@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace Openthesia;
@@ -49,6 +50,10 @@ public class Home
         if (ImGui.IsItemHovered())
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left, false))
+            {
+                Process.Start(new ProcessStartInfo("https://openthesia.pages.dev/") { UseShellExecute = true });
+            }
         }
 
         ImGui.SetNextWindowPos(ImGui.GetIO().DisplaySize / 2 - new Vector2(150, 0));
