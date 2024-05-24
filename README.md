@@ -2,7 +2,7 @@
  <img src="https://i.imgur.com/aN1rSmB.png" width="300" height="300" />
 </p>
 
-# Openthesia
+# Openthesia [![Github All Releases](https://img.shields.io/github/v/release/ImAxel0/Openthesia?&style=for-the-badge)]() [![Github All Releases](https://img.shields.io/github/downloads/ImAxel0/Openthesia/total.svg?&color=31CB15&style=for-the-badge)]()
 ### ...is a customizable midi visualization software with similar features to Synthesia
   
 ---
