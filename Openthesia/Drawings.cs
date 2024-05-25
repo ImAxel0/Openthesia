@@ -25,7 +25,7 @@ public class Drawings
                 {
                     float thickness = j * 2;
                     float alpha = 0.2f + (3 - j) * 0.2f;
-                    uint color = ImGui.GetColorU32(new Vector4(Settings.NotesColor.X, Settings.NotesColor.Y, Settings.NotesColor.Z, alpha) * 0.5f);
+                    uint color = ImGui.GetColorU32(new Vector4(Settings.R_HandColor.X, Settings.R_HandColor.Y, Settings.R_HandColor.Z, alpha) * 0.5f);
                     drawList.AddRect(
                         new Vector2(rw - 1, rh - 1),
                         new Vector2(rw + 20 + 1, rh + rl + 1),
@@ -36,7 +36,7 @@ public class Drawings
                     );
                 }
             }
-            drawList.AddRectFilled(new Vector2(rw, rh), new Vector2(rw + 20, rh + rl), ImGui.GetColorU32(Settings.NotesColor), 5, ImDrawFlags.RoundCornersAll);
+            drawList.AddRectFilled(new Vector2(rw, rh), new Vector2(rw + 20, rh + rl), ImGui.GetColorU32(Settings.R_HandColor), 5, ImDrawFlags.RoundCornersAll);
         }
     }
 

@@ -11,6 +11,7 @@ public class ProgramData
     public static readonly string ProgramVersion = "1.0.0";
     public static IntPtr LogoImage;
     public static string SettingsPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia", "Settings.json");
+    public static string HandsDataPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia\\HandsData");
 
     private class SettingsJson
     {
@@ -24,7 +25,8 @@ public class ProgramData
         public bool FpsCounter;
         public Settings.Themes Theme;
         public Vector4 MainBg;
-        public Vector4 NotesColor;
+        public Vector4 R_HandColor;
+        public Vector4 L_HandColor;
         public bool LockTopBar;
         public bool UpDirection;
         public bool ShowTextNotes;
@@ -33,6 +35,7 @@ public class ProgramData
     public static void Initialize()
     {
         Directory.CreateDirectory(Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia"));
+        Directory.CreateDirectory(HandsDataPath);
         LoadSettings();
         if (InputDevice.GetDevicesCount() > 0 && Settings.IDevice == null)
         {
@@ -81,7 +84,8 @@ public class ProgramData
                 Settings.SetFpsCounter(storedSettings.FpsCounter);
                 Settings.SetTheme(storedSettings.Theme);
                 Settings.MainBg = storedSettings.MainBg;
-                Settings.NotesColor = storedSettings.NotesColor;
+                Settings.R_HandColor = storedSettings.R_HandColor;
+                Settings.L_HandColor = storedSettings.L_HandColor;
                 ScreenCanvas.SetLockTopBar(storedSettings.LockTopBar);
                 ScreenCanvas.SetUpDirection(storedSettings.UpDirection);
                 ScreenCanvas.SetTextNotes(storedSettings.ShowTextNotes);
@@ -115,7 +119,8 @@ public class ProgramData
             FpsCounter = Settings.FpsCounter,   
             Theme = Settings.Theme,
             MainBg = Settings.MainBg,
-            NotesColor = Settings.NotesColor,
+            R_HandColor = Settings.R_HandColor,
+            L_HandColor = Settings.L_HandColor,
             LockTopBar = ScreenCanvas.LockTopBar,
             UpDirection = ScreenCanvas.UpDirection,
             ShowTextNotes = ScreenCanvas.ShowTextNotes,

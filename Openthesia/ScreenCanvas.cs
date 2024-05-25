@@ -15,11 +15,13 @@ public class ScreenCanvas
     static bool _upDirection;
     static bool _showTextNotes;
     static bool _isLearningMode;
+    static bool _isEditMode;
 
     public static bool LockTopBar { get { return _lockTopBar; } }
     public static bool UpDirection { get { return _upDirection; } }
     public static bool ShowTextNotes { get { return _showTextNotes; } }
     public static bool IsLearningMode { get { return _isLearningMode; } }
+    public static bool IsEditMode { get { return _isEditMode; } }
 
     private static float _fallSpeed = 2f;
     public static FallSpeeds FallSpeed = FallSpeeds.Default;
@@ -55,6 +57,11 @@ public class ScreenCanvas
     public static void SetLearningMode(bool onoff)
     {
         _isLearningMode = onoff;
+    }
+
+    public static void SetEditMode(bool onoff)
+    {
+        _isEditMode = onoff;
     }
 
     public static void SetLockTopBar(bool onoff)
@@ -127,7 +134,7 @@ public class ScreenCanvas
                     {
                         float thickness = i * 2;
                         float alpha = 0.2f + (3 - i) * 0.2f;
-                        uint color = ImGui.GetColorU32(new Vector4(Settings.NotesColor.X, Settings.NotesColor.Y, Settings.NotesColor.Z, alpha) * 0.5f * 0.7f);
+                        uint color = ImGui.GetColorU32(new Vector4(Settings.R_HandColor.X, Settings.R_HandColor.Y, Settings.R_HandColor.Z, alpha) * 0.5f * 0.7f);
                         drawList.AddRect(
                             new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault((SevenBitNumber)note.KeyNum, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4 - 1, py1 - 1),
                             new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault((SevenBitNumber)note.KeyNum, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4 + 1, py2 + 1),
@@ -141,7 +148,7 @@ public class ScreenCanvas
 
                 drawList.AddRectFilled(new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault((SevenBitNumber)note.KeyNum, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4, py1),
                   new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault((SevenBitNumber)note.KeyNum, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4, py2),
-                  ImGui.GetColorU32(Settings.NotesColor * 0.7f), 5, ImDrawFlags.RoundCornersAll);
+                  ImGui.GetColorU32(Settings.R_HandColor * 0.7f), 5, ImDrawFlags.RoundCornersAll);
             }
             else
             {
@@ -151,7 +158,7 @@ public class ScreenCanvas
                     {
                         float thickness = i * 2;
                         float alpha = 0.2f + (3 - i) * 0.2f;
-                        uint color = ImGui.GetColorU32(new Vector4(Settings.NotesColor.X, Settings.NotesColor.Y, Settings.NotesColor.Z, alpha) * 0.5f);
+                        uint color = ImGui.GetColorU32(new Vector4(Settings.R_HandColor.X, Settings.R_HandColor.Y, Settings.R_HandColor.Z, alpha) * 0.5f);
                         drawList.AddRect(
                             new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault((SevenBitNumber)note.KeyNum, 0) * PianoRenderer.Width - 1, py1 - 1),
                             new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault((SevenBitNumber)note.KeyNum, 0) * PianoRenderer.Width + PianoRenderer.Width + 1, py2 + 1),
@@ -165,7 +172,7 @@ public class ScreenCanvas
 
                 drawList.AddRectFilled(new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault((SevenBitNumber)note.KeyNum, 0) * PianoRenderer.Width, py1),
                     new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault((SevenBitNumber)note.KeyNum, 0) * PianoRenderer.Width + PianoRenderer.Width, py2),
-                    ImGui.GetColorU32(Settings.NotesColor), 5, ImDrawFlags.RoundCornersAll);
+                    ImGui.GetColorU32(Settings.R_HandColor), 5, ImDrawFlags.RoundCornersAll);
             }
             index++;
         }
@@ -186,27 +193,32 @@ public class ScreenCanvas
             MidiPlayer.Timer += ImGui.GetIO().DeltaTime * 100f * (float)MidiPlayer.Playback.Speed * _fallSpeed;
         }
 
+        int index = 0;
         var notes = MidiFileData.Notes;
         foreach (Note note in notes)
         {
             var time = (float)note.TimeAs<MetricTimeSpan>(MidiFileData.TempoMap).TotalSeconds * _fallSpeed;
             var length = (float)note.LengthAs<MetricTimeSpan>(MidiFileData.TempoMap).TotalSeconds * _fallSpeed;
+            var col = LeftRightData.S_IsRightNote[index] ? Settings.R_HandColor : Settings.L_HandColor;
 
             float py1;
             float py2;
             if (UpDirection && !IsLearningMode)
             {
                 py1 = PianoRenderer.P.Y + time * 100 - MidiPlayer.Timer;
-                py2 = PianoRenderer.P.Y + time * 100 + length * 100 - MidiPlayer.Timer; /*sec * 100 + fixed length*/
+                py2 = PianoRenderer.P.Y + time * 100 + length * 100 - MidiPlayer.Timer;
 
                 // skip notes outside of screen to save performance
                 if (py1 > PianoRenderer.P.Y || py2 < 0)
+                {
+                    index++;
                     continue;
+                }
             }
             else
             {
-                py1 = PianoRenderer.P.Y - time * 100 + MidiPlayer.Timer; /*sec * 100*/
-                py2 = PianoRenderer.P.Y - time * 100 + length * 100 + MidiPlayer.Timer; /*sec * 100 + fixed length*/
+                py1 = PianoRenderer.P.Y - time * 100 + MidiPlayer.Timer;
+                py2 = PianoRenderer.P.Y - time * 100 + length * 100 + MidiPlayer.Timer;
 
                 py1 -= length * 100;
                 py2 -= length * 100;
@@ -230,14 +242,58 @@ public class ScreenCanvas
 
                             if (note.NoteName.ToString().EndsWith("Sharp"))
                             {
-                                var v3 = new Vector3(Settings.NotesColor.X, Settings.NotesColor.Y, Settings.NotesColor.Z);
+                                var v3 = new Vector3(col.X, col.Y, col.Z);
                                 ImGui.GetForegroundDrawList().AddCircleFilled(new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4 + 10,
                                     py2 + PianoRenderer.Height / 1.7f), 7, ImGui.GetColorU32(new Vector4(v3, 1)));
                             }
                             else
                             {
                                 ImGui.GetForegroundDrawList().AddCircleFilled(new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width / 2,
-                                    py2 + PianoRenderer.Height / 1.2f), 7, ImGui.GetColorU32(Settings.NotesColor));
+                                    py2 + PianoRenderer.Height / 1.2f), 7, ImGui.GetColorU32(col));
+                            }
+                        }
+                    }
+                }
+
+                if (IsEditMode)
+                {
+                    if (note.NoteName.ToString().EndsWith("Sharp"))
+                    {
+                        if (ImGui.IsMouseHoveringRect(new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4, py1),
+                            new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4, py2)))
+                        {
+                            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                            if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                            {
+                                // set left
+                                MidiEditing.SetRightHand(index, false);
+                                MidiEditing.SaveData();
+                            }
+                            else if (ImGui.IsMouseDown(ImGuiMouseButton.Right))
+                            {
+                                // set right
+                                MidiEditing.SetRightHand(index, true);
+                                MidiEditing.SaveData();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (ImGui.IsMouseHoveringRect(new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width, py1),
+                            new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width, py2)))
+                        {
+                            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                            if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                            {
+                                // set left
+                                MidiEditing.SetRightHand(index, false);
+                                MidiEditing.SaveData();
+                            }
+                            else if (ImGui.IsMouseDown(ImGuiMouseButton.Right))
+                            {
+                                // set right
+                                MidiEditing.SetRightHand(index, true);
+                                MidiEditing.SaveData();
                             }
                         }
                     }
@@ -245,7 +301,10 @@ public class ScreenCanvas
                 
                 // skip notes outside of screen to save performance
                 if (py2 < 0 || py1 > PianoRenderer.P.Y)
+                {
+                    index++;
                     continue;
+                }
             }
 
             if (note.NoteName.ToString().EndsWith("Sharp"))
@@ -256,7 +315,7 @@ public class ScreenCanvas
                     {
                         float thickness = i * 2;
                         float alpha = 0.2f + (3 - i) * 0.2f;
-                        uint color = ImGui.GetColorU32(new Vector4(Settings.NotesColor.X, Settings.NotesColor.Y, Settings.NotesColor.Z, alpha) * 0.5f * 0.7f);
+                        uint color = ImGui.GetColorU32(new Vector4(col.X, col.Y, col.Z, alpha) * 0.5f * 0.7f);
                         drawList.AddRect(
                             new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4 - 1, py1 - 1),
                             new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4 + 1, py2 + 1),
@@ -270,7 +329,7 @@ public class ScreenCanvas
 
                 drawList.AddRectFilled(new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4, py1),
                       new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4, py2),
-                      ImGui.GetColorU32(Settings.NotesColor * 0.7f), 5, ImDrawFlags.RoundCornersAll);
+                      ImGui.GetColorU32(col * 0.7f), 5, ImDrawFlags.RoundCornersAll);
 
                 if (ShowTextNotes)
                 {
@@ -290,7 +349,7 @@ public class ScreenCanvas
                     {
                         float thickness = i * 2;
                         float alpha = 0.2f + (3 - i) * 0.2f;
-                        uint color = ImGui.GetColorU32(new Vector4(Settings.NotesColor.X, Settings.NotesColor.Y, Settings.NotesColor.Z, alpha) * 0.5f);
+                        uint color = ImGui.GetColorU32(new Vector4(col.X, col.Y, col.Z, alpha) * 0.5f);
                         drawList.AddRect(
                             new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width - 1, py1 - 1),
                             new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width + 1, py2 + 1),
@@ -304,7 +363,7 @@ public class ScreenCanvas
 
                 drawList.AddRectFilled(new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width, py1),
                     new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width, py2),
-                    ImGui.GetColorU32(Settings.NotesColor), 5, ImDrawFlags.RoundCornersAll);
+                    ImGui.GetColorU32(col), 5, ImDrawFlags.RoundCornersAll);
 
                 if (ShowTextNotes)
                 {
@@ -316,12 +375,13 @@ public class ScreenCanvas
                     ImGui.PopFont();
                 }
             }
+            index++;
         }
     }
 
     private static void GetPlaybackInputs()
     {
-        if (!IsLearningMode)
+        if (!IsLearningMode && !IsEditMode)
         {
             if (ImGui.GetIO().MouseWheel < 0)
             {
@@ -332,11 +392,11 @@ public class ScreenCanvas
             else if (ImGui.GetIO().MouseWheel > 0)
             {
                 float speed = (float)(MidiPlayer.Playback.Speed + 0.25f);
-                float cValue = Math.Clamp(speed, 0, 4);
+                float cValue = Math.Clamp(speed, 0.25f, 4);
                 MidiPlayer.Playback.Speed = cValue;
             }
         }
-
+        /*
         if (ImGui.IsMouseDown(ImGuiMouseButton.Right) && ImGui.GetIO().MouseDelta.Y != 0 && !MidiPlayer.IsTimerRunning)
         {
             float n = ImGui.GetIO().MouseDelta.Y < 0 ? -1 : 1;
@@ -344,7 +404,7 @@ public class ScreenCanvas
             MidiPlayer.Seconds = Math.Clamp(MidiPlayer.Seconds + n, 0, (int)MidiPlayer.Playback.GetDuration<MetricTimeSpan>().TotalSeconds);
             MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)MidiPlayer.Seconds));
             MidiPlayer.Timer = MidiPlayer.Seconds * 100 * _fallSpeed;
-        }
+        } */
 
         if (ImGui.IsKeyPressed(ImGuiKey.Space, false))
         {
@@ -359,7 +419,7 @@ public class ScreenCanvas
             }
         }
 
-        if (ImGui.IsKeyPressed(ImGuiKey.R, false) && !Settings.KeyboardInput && !IsLearningMode)
+        if (ImGui.IsKeyPressed(ImGuiKey.R, false) && !Settings.KeyboardInput && !IsLearningMode && !IsEditMode)
         {
             _upDirection = !_upDirection;
         }
@@ -377,7 +437,7 @@ public class ScreenCanvas
             Settings.SetNeonFx(!Settings.NeonFx);
         }
 
-        if (!IsLearningMode)
+        if (!IsLearningMode && !IsEditMode)
         {
             if (ImGui.IsKeyPressed(ImGuiKey.UpArrow, false))
             {
@@ -522,14 +582,14 @@ public class ScreenCanvas
                 if (ImGui.SliderFloat("##Progress slider", ref MidiPlayer.Seconds, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds, "%.0f"))
                 {
                     MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)MidiPlayer.Seconds));
-                    //MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(MidiPlayer.Time.TotalMicroseconds));
+                    //MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(MidiPlayer.Time.Milliseconds));
                     MidiPlayer.Timer = MidiPlayer.Seconds * 100 * _fallSpeed;
                 }
 
                 ImGui.SetNextWindowPos(new(ImGui.GetIO().DisplaySize.X / 2 - 85, CanvasPos.Y + 50));
                 ImGui.BeginChild("Player controls", new Vector2(170, 50), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
-                var playColor = !MidiPlayer.IsTimerRunning ? Vector4.One : Settings.NotesColor;
+                var playColor = !MidiPlayer.IsTimerRunning ? Vector4.One : Settings.R_HandColor;
 
                 ImGui.PushFont(FontController.Font16_Icon16);
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = playColor;
@@ -564,7 +624,7 @@ public class ScreenCanvas
                 var icon = LockTopBar ? FontAwesome6.Lock : FontAwesome6.LockOpen;
                 var showTextIcon = ShowTextNotes ? FontAwesome6.TextHeight : FontAwesome6.TextSlash;
 
-                if (!IsLearningMode)
+                if (!IsLearningMode && !IsEditMode)
                 {
                     ImGui.PushFont(FontController.Font16_Icon16);
                     ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220, CanvasPos.Y + 50));
@@ -591,7 +651,7 @@ public class ScreenCanvas
                 }
                 ImGui.PopFont();
 
-                if (!IsLearningMode)
+                if (!IsLearningMode && !IsEditMode)
                 {
                     ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220, CanvasPos.Y + 110));
                     if (ImGui.BeginCombo("##Fall speed", $"{FallSpeed}",
@@ -648,8 +708,12 @@ public class ScreenCanvas
         }
         ImGui.PopFont();
 
-        ImGui.SetCursorScreenPos(new(70, CanvasPos.Y + 110));      
-        ImGui.ColorEdit4("Color", ref Settings.NotesColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel
+        ImGui.SetCursorScreenPos(new(70, CanvasPos.Y + 110));
+        ImGui.ColorEdit4("Left Hand Color", ref Settings.L_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel
+            | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
+
+        ImGui.SetCursorScreenPos(new(115, CanvasPos.Y + 110));      
+        ImGui.ColorEdit4("Right Hand Color", ref Settings.R_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel
             | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
 
         ImGui.PopFont();

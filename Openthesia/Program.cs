@@ -110,7 +110,7 @@ class Program
                 ScreenCanvas.RenderScreen();
                 ImGui.EndChild();
 
-                ImGui.GetForegroundDrawList().AddLine(new(0, ImGui.GetCursorPos().Y), new(ImGui.GetIO().DisplaySize.X, ImGui.GetCursorPos().Y), ImGui.GetColorU32(Settings.NotesColor), 2);
+                ImGui.GetForegroundDrawList().AddLine(new(0, ImGui.GetCursorPos().Y), new(ImGui.GetIO().DisplaySize.X, ImGui.GetCursorPos().Y), ImGui.GetColorU32(Settings.R_HandColor), 2);
 
                 ImGui.BeginChild("Keyboard", ImGui.GetContentRegionAvail());
                 PianoRenderer.RenderKeyboard();
@@ -121,7 +121,7 @@ class Program
                 ScreenCanvas.RenderScreen(true);
                 ImGui.EndChild();
 
-                ImGui.GetForegroundDrawList().AddLine(new(0, ImGui.GetCursorPos().Y), new(ImGui.GetIO().DisplaySize.X, ImGui.GetCursorPos().Y), ImGui.GetColorU32(Settings.NotesColor), 2);
+                ImGui.GetForegroundDrawList().AddLine(new(0, ImGui.GetCursorPos().Y), new(ImGui.GetIO().DisplaySize.X, ImGui.GetCursorPos().Y), ImGui.GetColorU32(Settings.R_HandColor), 2);
 
                 ImGui.BeginChild("Keyboard", ImGui.GetContentRegionAvail());
                 PianoRenderer.RenderKeyboard();

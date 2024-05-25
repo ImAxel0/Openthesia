@@ -56,7 +56,7 @@ public class PianoRenderer
 
             if (IOHandle.PressedKeys.Contains(cur_key))
             {
-                var color = Settings.KeyPressColorMatch ? ImGui.GetColorU32(Settings.NotesColor) : _whitePressed;
+                var color = Settings.KeyPressColorMatch ? ImGui.GetColorU32(Settings.R_HandColor) : _whitePressed;
                 col = color;
             }
 
@@ -120,7 +120,7 @@ public class PianoRenderer
 
                 if (IOHandle.PressedKeys.Contains(cur_key))
                 {
-                    var v3 = new Vector3(Settings.NotesColor.X, Settings.NotesColor.Y, Settings.NotesColor.Z);
+                    var v3 = new Vector3(Settings.R_HandColor.X, Settings.R_HandColor.Y, Settings.R_HandColor.Z);
                     var color = Settings.KeyPressColorMatch ? ImGui.GetColorU32(new Vector4(v3, 1)) : _blackPressed;
                     col = color;
                 }

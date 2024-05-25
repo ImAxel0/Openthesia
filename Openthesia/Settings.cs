@@ -46,7 +46,9 @@ public class Settings
     }
 
     public static Vector4 MainBg = ImGuiTheme.HtmlToVec4("#1F2937");
-    public static Vector4 NotesColor = ImGuiTheme.HtmlToVec4("#31CB15");
+    //public static Vector4 NotesColor = ImGuiTheme.HtmlToVec4("#31CB15");
+    public static Vector4 R_HandColor = ImGuiTheme.HtmlToVec4("#15CB44");
+    public static Vector4 L_HandColor = ImGuiTheme.HtmlToVec4("#D4084A");
 
     public static void SetMidiPaths(List<string> paths)
     {
@@ -84,16 +86,17 @@ public class Settings
         {
             case Themes.Sky:
                 MainBg = ImGuiTheme.HtmlToVec4("#1F2937");
-                NotesColor = ImGuiTheme.HtmlToVec4("#31CB15");
+                R_HandColor = ImGuiTheme.HtmlToVec4("#15CB44");
+                L_HandColor = ImGuiTheme.HtmlToVec4("#D4084A");
                 break;
 
             case Themes.Volcano:
                 MainBg = ImGuiTheme.HtmlToVec4("#151617");
-                NotesColor = ImGuiTheme.HtmlToVec4("#E51C1C");
+                R_HandColor = ImGuiTheme.HtmlToVec4("#E51C1C");
                 break;
             case Themes.Synthesia:
                 MainBg = ImGuiTheme.HtmlToVec4("#313131");
-                NotesColor = ImGuiTheme.HtmlToVec4("#87C853");
+                R_HandColor = ImGuiTheme.HtmlToVec4("#87C853");
                 break;
         }
         Theme = theme;
@@ -328,7 +331,9 @@ public class Settings
         ImGui.Text($"LOOK AND FEEL {FontAwesome6.Paintbrush}");
         ImGui.ColorEdit4("Background color", ref MainBg, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha | ImGuiColorEditFlags.NoDragDrop);
         ImGui.SameLine();
-        ImGui.ColorEdit4("Notes color", ref NotesColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha | ImGuiColorEditFlags.NoDragDrop);
+        ImGui.ColorEdit4("Right Hand color", ref R_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha | ImGuiColorEditFlags.NoDragDrop);
+        ImGui.SameLine();
+        ImGui.ColorEdit4("Left Hand color", ref L_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha | ImGuiColorEditFlags.NoDragDrop);
         ImGui.SameLine();
         ImGui.Checkbox("Notes glow FX", ref _neonFx);
         Drawings.Tooltip("Adds a subtle glowing effect around each note");
