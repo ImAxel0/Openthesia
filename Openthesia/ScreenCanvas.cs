@@ -23,6 +23,11 @@ public class ScreenCanvas
     public static bool IsLearningMode { get { return _isLearningMode; } }
     public static bool IsEditMode { get { return _isEditMode; } }
 
+    private static Vector2 _rectStart;
+    private static Vector2 _rectEnd;
+    private static bool _isRectMode;
+    private static bool _isRightRect;
+
     private static float _fallSpeed = 2f;
     public static FallSpeeds FallSpeed = FallSpeeds.Default;
     public enum FallSpeeds
@@ -93,6 +98,11 @@ public class ScreenCanvas
                 drawList.AddLine(CanvasPos + new Vector2(key * PianoRenderer.Width, 0), 
                     new(PianoRenderer.P.X + key * PianoRenderer.Width, PianoRenderer.P.Y), ImGui.GetColorU32(new Vector4(Vector3.One, 0.06f)));
         }
+    }
+
+    private static bool IsRectInside(Vector2 aMin, Vector2 aMax, Vector2 bMin, Vector2 bMax)
+    {
+        return aMin.X >= bMin.X && aMax.X <= bMax.X && aMin.Y >= bMin.Y && aMax.Y <= bMax.Y;
     }
 
     private static void DrawInputNotes()
@@ -203,7 +213,7 @@ public class ScreenCanvas
 
             float py1;
             float py2;
-            if (UpDirection && !IsLearningMode)
+            if (UpDirection && !IsLearningMode && !IsEditMode)
             {
                 py1 = PianoRenderer.P.Y + time * 100 - MidiPlayer.Timer;
                 py2 = PianoRenderer.P.Y + time * 100 + length * 100 - MidiPlayer.Timer;
@@ -257,19 +267,66 @@ public class ScreenCanvas
 
                 if (IsEditMode)
                 {
+                    if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left) && !_isRectMode)
+                    {
+                        _rectStart = ImGui.GetMousePos();
+                        _isRightRect = false;
+                        _isRectMode = true;
+                    }
+
+                    if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Right) && !_isRectMode)
+                    {
+                        _rectStart = ImGui.GetMousePos();
+                        _isRightRect = true;
+                        _isRectMode = true;
+                    }
+
+                    if (_isRectMode)
+                    {
+                        Vector4 rectCol = _isRightRect ? Settings.R_HandColor : Settings.L_HandColor;
+                        ImGui.GetWindowDrawList().AddRect(_rectStart, ImGui.GetMousePos(), ImGui.GetColorU32(rectCol));
+
+                        // to refactor, performance heavy
+                        float rpx1;
+                        float rpx2;
+                        if (note.NoteName.ToString().EndsWith("Sharp"))
+                        {
+                            rpx1 = PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4;
+                            rpx2 = PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4;
+                        }
+                        else
+                        {
+                            rpx1 = PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width;
+                            rpx2 = PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width;
+                        }
+
+                        bool isInside = IsRectInside(_rectStart, ImGui.GetMousePos(), new(rpx1, py1), new(rpx2, py2));
+                        if (isInside)
+                        {                      
+                            MidiEditing.SetRightHand(index, _isRightRect);
+                        }
+                    }
+
+                    if ((ImGui.IsMouseReleased(ImGuiMouseButton.Left) || ImGui.IsMouseReleased(ImGuiMouseButton.Right)) && _isRectMode)
+                    {
+                        MidiEditing.SaveData();
+                        _rectEnd = ImGui.GetMousePos();
+                        _isRectMode = false;
+                    }
+
                     if (note.NoteName.ToString().EndsWith("Sharp"))
                     {
                         if (ImGui.IsMouseHoveringRect(new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4, py1),
                             new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4, py2)))
                         {
                             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-                            if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                            if (ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_isRectMode)
                             {
                                 // set left
                                 MidiEditing.SetRightHand(index, false);
                                 MidiEditing.SaveData();
                             }
-                            else if (ImGui.IsMouseDown(ImGuiMouseButton.Right))
+                            else if (ImGui.IsMouseDown(ImGuiMouseButton.Right) && !_isRectMode)
                             {
                                 // set right
                                 MidiEditing.SetRightHand(index, true);
@@ -283,13 +340,13 @@ public class ScreenCanvas
                             new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width, py2)))
                         {
                             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-                            if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                            if (ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_isRectMode)
                             {
                                 // set left
                                 MidiEditing.SetRightHand(index, false);
                                 MidiEditing.SaveData();
                             }
-                            else if (ImGui.IsMouseDown(ImGuiMouseButton.Right))
+                            else if (ImGui.IsMouseDown(ImGuiMouseButton.Right) && !_isRectMode)
                             {
                                 // set right
                                 MidiEditing.SetRightHand(index, true);
@@ -381,7 +438,7 @@ public class ScreenCanvas
 
     private static void GetPlaybackInputs()
     {
-        if (!IsLearningMode && !IsEditMode)
+        if (!IsLearningMode)
         {
             if (ImGui.GetIO().MouseWheel < 0)
             {
@@ -437,7 +494,7 @@ public class ScreenCanvas
             Settings.SetNeonFx(!Settings.NeonFx);
         }
 
-        if (!IsLearningMode && !IsEditMode)
+        if (!IsLearningMode)
         {
             if (ImGui.IsKeyPressed(ImGuiKey.UpArrow, false))
             {
@@ -548,6 +605,11 @@ public class ScreenCanvas
                         var recordedMidi = MidiRecording.GetRecordedMidi();
                         if (recordedMidi != null)
                         {
+                            LeftRightData.S_IsRightNote.Clear();
+                            foreach (var n in recordedMidi.GetNotes())
+                            {
+                                LeftRightData.S_IsRightNote.Add(true);
+                            }
                             MidiFileHandler.LoadMidiFile(recordedMidi);
                             Router.SetRoute(Router.Routes.MidiPlayback);
                         }
@@ -651,7 +713,7 @@ public class ScreenCanvas
                 }
                 ImGui.PopFont();
 
-                if (!IsLearningMode && !IsEditMode)
+                if (!IsLearningMode)
                 {
                     ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220, CanvasPos.Y + 110));
                     if (ImGui.BeginCombo("##Fall speed", $"{FallSpeed}",

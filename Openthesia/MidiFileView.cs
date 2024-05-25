@@ -48,8 +48,8 @@ public class MidiFileView
             ImGui.PopFont();
 
             ImGui.PushFont(FontController.BigIcon);
-            ImGui.SetCursorPos(new(ImGui.GetIO().DisplaySize.X / 1.6f + 125 - ImGui.CalcTextSize(FontAwesome6.FilePen).X / 2, ImGui.GetIO().DisplaySize.Y / 2.5f));
-            ImGui.Text(FontAwesome6.FilePen);
+            ImGui.SetCursorPos(new(ImGui.GetIO().DisplaySize.X / 1.6f + 125 - ImGui.CalcTextSize(FontAwesome6.Hands).X / 2, ImGui.GetIO().DisplaySize.Y / 2.5f));
+            ImGui.Text(FontAwesome6.Hands);
             ImGui.PopFont();
 
             ImGui.PushFont(FontController.GetFontOfSize(22));
@@ -60,6 +60,7 @@ public class MidiFileView
             {
                 ScreenCanvas.SetLearningMode(false);
                 ScreenCanvas.SetEditMode(false);
+                LeftRightData.S_IsRightNote.Clear();
                 foreach (var n in MidiFileData.Notes)
                 {
                     LeftRightData.S_IsRightNote.Add(true);
@@ -78,6 +79,7 @@ public class MidiFileView
                 MidiPlayer.Playback.OutputDevice = null; // mute the playback
                 ScreenCanvas.SetLearningMode(true);
                 ScreenCanvas.SetEditMode(false);
+                LeftRightData.S_IsRightNote.Clear();
                 foreach (var n in MidiFileData.Notes)
                 {
                     LeftRightData.S_IsRightNote.Add(true);

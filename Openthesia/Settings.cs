@@ -93,10 +93,12 @@ public class Settings
             case Themes.Volcano:
                 MainBg = ImGuiTheme.HtmlToVec4("#151617");
                 R_HandColor = ImGuiTheme.HtmlToVec4("#E51C1C");
+                L_HandColor = ImGuiTheme.HtmlToVec4("#D4084A");
                 break;
             case Themes.Synthesia:
                 MainBg = ImGuiTheme.HtmlToVec4("#313131");
                 R_HandColor = ImGuiTheme.HtmlToVec4("#87C853");
+                L_HandColor = ImGuiTheme.HtmlToVec4("#D4084A");
                 break;
         }
         Theme = theme;
