@@ -7,6 +7,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Vulkan.Xlib;
 
 namespace Openthesia;
 
@@ -54,6 +55,17 @@ public class MidiFileView
 
             ImGui.PushFont(FontController.GetFontOfSize(22));
 
+            var drawList = ImGui.GetWindowDrawList();
+            string t1 = "Peacefully listen and visualize the piece";
+            drawList.AddText(new(ImGui.GetIO().DisplaySize.X / 10 + 125, ImGui.GetIO().DisplaySize.Y / 2.5f),
+                ImGui.GetColorU32(Vector4.One), t1);
+            string t2 = "Playback will wait for the right note input";
+            drawList.AddText(new(ImGui.GetIO().DisplaySize.X / 2.8f + 125, ImGui.GetIO().DisplaySize.Y / 2.5f),
+                ImGui.GetColorU32(Vector4.One), t2);
+            string t3 = "Separate right and left hands with colors";
+            drawList.AddText(new(ImGui.GetIO().DisplaySize.X / 1.6f + 125, ImGui.GetIO().DisplaySize.Y / 2.5f),
+                ImGui.GetColorU32(Vector4.One), t3);
+
             ImGuiTheme.PushButton(ImGuiTheme.HtmlToVec4("#31CB15"), ImGuiTheme.HtmlToVec4("#20870E"), ImGuiTheme.HtmlToVec4("#31CB15"));
             ImGui.SetCursorPos(new(ImGui.GetIO().DisplaySize.X / 10, ImGui.GetIO().DisplaySize.Y / 1.5f));
             if (ImGui.Button($"View and listen", new(250, 100)))
@@ -94,7 +106,6 @@ public class MidiFileView
             if (ImGui.Button($"Edit mode", new(250, 100)))
             {
                 ScreenCanvas.SetLearningMode(false);
-                // set edit mode true
                 ScreenCanvas.SetEditMode(true);
                 LeftRightData.S_IsRightNote.Clear();
                 foreach (var n in MidiFileData.Notes)

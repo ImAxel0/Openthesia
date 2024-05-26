@@ -51,4 +51,13 @@ public class Drawings
             ImGui.EndTooltip();
         }
     }
+
+    public static void NoteTooltip(string description)
+    {
+        ImGui.BeginTooltip();
+        ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
+        ImGui.TextUnformatted(description);
+        ImGui.PopTextWrapPos();
+        ImGui.EndTooltip();
+    }
 }

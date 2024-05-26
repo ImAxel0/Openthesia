@@ -267,14 +267,14 @@ public class ScreenCanvas
 
                 if (IsEditMode)
                 {
-                    if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left) && !_isRectMode)
+                    if (ImGui.GetIO().KeyCtrl && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_isRectMode)
                     {
                         _rectStart = ImGui.GetMousePos();
                         _isRightRect = false;
                         _isRectMode = true;
                     }
 
-                    if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Right) && !_isRectMode)
+                    if (ImGui.GetIO().KeyCtrl && ImGui.IsMouseDown(ImGuiMouseButton.Right) && !_isRectMode)
                     {
                         _rectStart = ImGui.GetMousePos();
                         _isRightRect = true;
@@ -283,10 +283,16 @@ public class ScreenCanvas
 
                     if (_isRectMode)
                     {
-                        Vector4 rectCol = _isRightRect ? Settings.R_HandColor : Settings.L_HandColor;
-                        ImGui.GetWindowDrawList().AddRect(_rectStart, ImGui.GetMousePos(), ImGui.GetColorU32(rectCol));
+                        // only allow rect going top-left
+                        if (ImGui.GetMousePos().Y > _rectStart.Y || ImGui.GetMousePos().X > _rectStart.X)
+                        {
+                            _isRectMode = false;
+                        }
 
-                        // to refactor, performance heavy
+                        Vector4 rectCol = _isRightRect ? Settings.R_HandColor : Settings.L_HandColor;
+                        var v3 = new Vector3(rectCol.X, rectCol.Y, rectCol.Z);
+                        ImGui.GetWindowDrawList().AddRectFilled(_rectStart, ImGui.GetMousePos(), ImGui.GetColorU32(new Vector4(v3, .005f)));
+
                         float rpx1;
                         float rpx2;
                         if (note.NoteName.ToString().EndsWith("Sharp"))
@@ -319,7 +325,12 @@ public class ScreenCanvas
                         if (ImGui.IsMouseHoveringRect(new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4, py1),
                             new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4, py2)))
                         {
-                            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                            if (ShowTextNotes)
+                            {
+                                Drawings.NoteTooltip($"Note: {note.NoteName}\nOctave: {note.Octave}\nVelocity: {note.Velocity}" +
+                                    $"\nNumber: {note.NoteNumber}\nRight Hand: {LeftRightData.S_IsRightNote[index]}");
+                            }
+
                             if (ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_isRectMode)
                             {
                                 // set left
@@ -339,7 +350,12 @@ public class ScreenCanvas
                         if (ImGui.IsMouseHoveringRect(new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width, py1),
                             new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width, py2)))
                         {
-                            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                            if (ShowTextNotes)
+                            {
+                                Drawings.NoteTooltip($"Note: {note.NoteName}\nOctave: {note.Octave}\nVelocity: {note.Velocity}" +
+                                    $"\nNumber: {note.NoteNumber}\nRight Hand: {LeftRightData.S_IsRightNote[index]}");
+                            }
+
                             if (ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_isRectMode)
                             {
                                 // set left
