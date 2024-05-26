@@ -469,15 +469,6 @@ public class ScreenCanvas
                 MidiPlayer.Playback.Speed = cValue;
             }
         }
-        /*
-        if (ImGui.IsMouseDown(ImGuiMouseButton.Right) && ImGui.GetIO().MouseDelta.Y != 0 && !MidiPlayer.IsTimerRunning)
-        {
-            float n = ImGui.GetIO().MouseDelta.Y < 0 ? -1 : 1;
-            if (UpDirection) n = -n;
-            MidiPlayer.Seconds = Math.Clamp(MidiPlayer.Seconds + n, 0, (int)MidiPlayer.Playback.GetDuration<MetricTimeSpan>().TotalSeconds);
-            MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)MidiPlayer.Seconds));
-            MidiPlayer.Timer = MidiPlayer.Seconds * 100 * _fallSpeed;
-        } */
 
         if (ImGui.IsKeyPressed(ImGuiKey.Space, false))
         {
@@ -500,6 +491,20 @@ public class ScreenCanvas
         if (ImGui.IsKeyPressed(ImGuiKey.T, false) && !Settings.KeyboardInput)
         {
             _showTextNotes = !_showTextNotes;
+        }
+
+        if (ImGui.IsKeyPressed(ImGuiKey.RightArrow))
+        {
+            var newTime = Math.Clamp(MidiPlayer.Seconds + 1, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds);
+            MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)newTime));
+            MidiPlayer.Timer = (int)newTime * 100 * _fallSpeed;
+        }
+
+        if (ImGui.IsKeyPressed(ImGuiKey.LeftArrow))
+        {
+            var newTime = Math.Clamp(MidiPlayer.Seconds - 1, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds);
+            MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)newTime));
+            MidiPlayer.Timer = (int)newTime * 100 * _fallSpeed;
         }
     }
 
@@ -661,7 +666,7 @@ public class ScreenCanvas
                 {
                     MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)MidiPlayer.Seconds));
                     //MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(MidiPlayer.Time.Milliseconds));
-                    MidiPlayer.Timer = MidiPlayer.Seconds * 100 * _fallSpeed;
+                    MidiPlayer.Timer = (int)MidiPlayer.Seconds * 100 * _fallSpeed;
                 }
 
                 ImGui.SetNextWindowPos(new(ImGui.GetIO().DisplaySize.X / 2 - 85, CanvasPos.Y + 50));
