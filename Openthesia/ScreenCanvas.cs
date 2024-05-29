@@ -581,10 +581,10 @@ public class ScreenCanvas
         
         GetInputs();
 
+        var showTopBar = ImGui.IsMouseHoveringRect(Vector2.Zero, new(ImGui.GetIO().DisplaySize.X, 150));
+
         if (playMode)
         {
-            var showTopBar = ImGui.IsMouseHoveringRect(Vector2.Zero, new(ImGui.GetIO().DisplaySize.X, 150));
-
             if (showTopBar || LockTopBar)
             {
                 ImGui.SetNextWindowPos(new(ImGui.GetIO().DisplaySize.X / 2 - 85, CanvasPos.Y + 50));
@@ -656,8 +656,6 @@ public class ScreenCanvas
         if (!playMode)
         {        
             GetPlaybackInputs();
-
-            var showTopBar = ImGui.IsMouseHoveringRect(Vector2.Zero, new(ImGui.GetIO().DisplaySize.X, 150));
 
             if (showTopBar || LockTopBar)
             {
@@ -763,41 +761,46 @@ public class ScreenCanvas
                         }
                         ImGui.EndCombo();
                     }
-                }
-
-                ImGui.PushFont(FontController.Font16_Icon16);
-                ImGui.SetCursorScreenPos(new(25, CanvasPos.Y + 50));
-                if (ImGui.Button(FontAwesome6.ArrowLeftLong, new(100, 50)) || ImGui.IsKeyPressed(ImGuiKey.Escape, false))
-                {
-                    MidiPlayer.Playback?.Stop();
-                    MidiPlayer.Playback?.MoveToStart();
-                    MidiPlayer.IsTimerRunning = false;
-                    MidiPlayer.Timer = 0;
-                    SetLearningMode(false);
-                    var route = playMode ? Router.Routes.Home : Router.Routes.MidiList;
-                    Router.SetRoute(route);
-                }
-                ImGui.PopFont();
-
-                var neonIcon = Settings.NeonFx ? FontAwesome6.Lightbulb : FontAwesome6.PowerOff;
-
-                ImGui.PushFont(FontController.Font16_Icon16);
-                ImGui.SetCursorScreenPos(new(25, CanvasPos.Y + 110));
-                if (ImGui.Button(neonIcon, new(35, 35)))
-                {
-                    Settings.SetNeonFx(!Settings.NeonFx);
-                }
-                ImGui.PopFont();
-
-                ImGui.SetCursorScreenPos(new(70, CanvasPos.Y + 110));
-                ImGui.ColorEdit4("Left Hand Color", ref Settings.L_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel
-                    | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
-
-                ImGui.SetCursorScreenPos(new(115, CanvasPos.Y + 110));
-                ImGui.ColorEdit4("Right Hand Color", ref Settings.R_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel
-                    | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
+                }             
             }
         }
+
+        if (showTopBar || LockTopBar)
+        {
+            ImGui.PushFont(FontController.Font16_Icon16);
+            ImGui.SetCursorScreenPos(new(25, CanvasPos.Y + 50));
+            if (ImGui.Button(FontAwesome6.ArrowLeftLong, new(100, 50)) || ImGui.IsKeyPressed(ImGuiKey.Escape, false))
+            {
+                MidiPlayer.Playback?.Stop();
+                MidiPlayer.Playback?.MoveToStart();
+                MidiPlayer.IsTimerRunning = false;
+                MidiPlayer.Timer = 0;
+                SetLearningMode(false);
+                var route = playMode ? Router.Routes.Home : Router.Routes.MidiList;
+                Router.SetRoute(route);
+            }
+            ImGui.PopFont();
+
+            var neonIcon = Settings.NeonFx ? FontAwesome6.Lightbulb : FontAwesome6.PowerOff;
+
+            ImGui.PushFont(FontController.Font16_Icon16);
+            ImGui.SetCursorScreenPos(new(25, CanvasPos.Y + 110));
+            if (ImGui.Button(neonIcon, new(35, 35)))
+            {
+                Settings.SetNeonFx(!Settings.NeonFx);
+            }
+            ImGui.PopFont();
+
+            ImGui.SetCursorScreenPos(new(70, CanvasPos.Y + 110));
+            ImGui.ColorEdit4("Left Hand Color", ref Settings.L_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel
+                | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
+
+            ImGui.SetCursorScreenPos(new(115, CanvasPos.Y + 110));
+            ImGui.ColorEdit4("Right Hand Color", ref Settings.R_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel
+                | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
+
+        }
+
         ImGui.PopFont();
     }
 }
