@@ -20,6 +20,7 @@ In the Play mode you can visualize midi inputs as rising note blocks and also re
 - **Midi playback**: play and visualize midi files at different speeds, tempo and notes direction
 - **Learning mode**: wait for the right key input before going to the next note
 - **Play mode**: visualize midi input realtime and record it to export it as a midi file
+- **Hands separation**: differentiate between left and right hand with colors
 
 ## What operating systems does it support? :desktop_computer:
 As of now Openthesia is only available on Windows devices, support for other platforms isn't currently planned.
