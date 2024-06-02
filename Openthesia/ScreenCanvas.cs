@@ -3,6 +3,7 @@ using ImGuiNET;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Interaction;
 using System.Numerics;
+using Vulkan.Xlib;
 using Note = Melanchall.DryWetMidi.Interaction.Note;
 
 namespace Openthesia;
@@ -469,6 +470,20 @@ public class ScreenCanvas
                 MidiPlayer.Playback.Speed = cValue;
             }
         }
+        /*
+        if (ImGui.GetIO().MouseDelta.Y != 0 && !MidiPlayer.IsTimerRunning && ImGui.IsMouseDown(ImGuiMouseButton.Right))
+        {
+            float n = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Y / 1000;// < 0 ? -0.1f : 0.1f;
+            n = Math.Clamp(n, -10, 10);
+            Console.WriteLine(n);
+            //Console.WriteLine(ImGui.GetIO().MouseDelta.Y);
+            if (UpDirection) n = -n;
+            var newTime = Math.Clamp(MidiPlayer.Seconds + n, 0, (float)MidiPlayer.Playback.GetDuration<MetricTimeSpan>().TotalSeconds);
+            long ms = (long)(newTime * 1000000);
+            MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
+            //MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)MidiPlayer.Seconds));
+            MidiPlayer.Timer = newTime * 100 * _fallSpeed;
+        } */
 
         if (ImGui.IsKeyPressed(ImGuiKey.Space, false))
         {
@@ -495,16 +510,20 @@ public class ScreenCanvas
 
         if (ImGui.IsKeyPressed(ImGuiKey.RightArrow))
         {
-            var newTime = Math.Clamp(MidiPlayer.Seconds + 1, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds);
-            MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)newTime));
-            MidiPlayer.Timer = (int)newTime * 100 * _fallSpeed;
+            float n = ImGui.GetIO().KeyCtrl ? 0.1f : 1f;
+            var newTime = Math.Clamp(MidiPlayer.Seconds + n, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds);
+            long ms = (long)(newTime * 1000000);
+            MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
+            MidiPlayer.Timer = newTime * 100 * _fallSpeed;
         }
 
         if (ImGui.IsKeyPressed(ImGuiKey.LeftArrow))
         {
-            var newTime = Math.Clamp(MidiPlayer.Seconds - 1, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds);
-            MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)newTime));
-            MidiPlayer.Timer = (int)newTime * 100 * _fallSpeed;
+            float n = ImGui.GetIO().KeyCtrl ? 0.1f : 1f;
+            var newTime = Math.Clamp(MidiPlayer.Seconds - n, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds);
+            long ms = (long)(newTime * 1000000);
+            MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
+            MidiPlayer.Timer = newTime * 100 * _fallSpeed;
         }
     }
 
@@ -660,12 +679,38 @@ public class ScreenCanvas
             if (showTopBar || LockTopBar)
             {
                 ImGui.SetNextItemWidth(ImGui.GetIO().DisplaySize.X);
-                if (ImGui.SliderFloat("##Progress slider", ref MidiPlayer.Seconds, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds, "%.0f"))
+
+                var pBarBg = new Vector3(Settings.MainBg.X, Settings.MainBg.Y, Settings.MainBg.Z);
+                var oldFrameBg = ImGuiTheme.Style.Colors[(int)ImGuiCol.FrameBg];
+                var oldFrameBgHovered = ImGuiTheme.Style.Colors[(int)ImGuiCol.FrameBgHovered];
+                var oldFrameBgActive = ImGuiTheme.Style.Colors[(int)ImGuiCol.FrameBgActive];
+                var oldSliderGrab = ImGuiTheme.Style.Colors[(int)ImGuiCol.SliderGrab];
+                var oldSliderGrabActive = ImGuiTheme.Style.Colors[(int)ImGuiCol.SliderGrabActive];
+
+                ImGuiTheme.Style.Colors[(int)ImGuiCol.FrameBg] = new Vector4(pBarBg, 0.8f);
+                ImGuiTheme.Style.Colors[(int)ImGuiCol.FrameBgHovered] = new Vector4(pBarBg, 0.8f);
+                ImGuiTheme.Style.Colors[(int)ImGuiCol.FrameBgActive] = new Vector4(pBarBg, 0.8f);
+                ImGuiTheme.Style.Colors[(int)ImGuiCol.SliderGrab] = Settings.R_HandColor;
+                ImGuiTheme.Style.Colors[(int)ImGuiCol.SliderGrabActive] = Settings.R_HandColor;
+
+                if (ImGui.SliderFloat("##Progress slider", ref MidiPlayer.Seconds, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds, "%.1f", 
+                    ImGuiSliderFlags.NoRoundToFormat | ImGuiSliderFlags.AlwaysClamp | ImGuiSliderFlags.NoInput))
                 {
-                    MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)MidiPlayer.Seconds));
-                    //MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(MidiPlayer.Time.Milliseconds));
-                    MidiPlayer.Timer = (int)MidiPlayer.Seconds * 100 * _fallSpeed;
+                    long ms = (long)(MidiPlayer.Seconds * 1000000);
+                    MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
+                    MidiPlayer.Timer = MidiPlayer.Seconds * 100 * _fallSpeed;
                 }
+                var pBarHeight = ImGui.GetItemRectSize().Y;
+                var playbackPercentage = MidiPlayer.Seconds * 100 / (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds;
+                var pBarWidth = ImGui.GetIO().DisplaySize.X * playbackPercentage / 100;
+                var v3 = new Vector3(Settings.R_HandColor.X, Settings.R_HandColor.Y, Settings.R_HandColor.Z);
+                ImGui.GetWindowDrawList().AddRectFilled(Vector2.Zero, new Vector2(pBarWidth, pBarHeight), ImGui.GetColorU32(new Vector4(v3, 0.2f)));
+
+                ImGuiTheme.Style.Colors[(int)ImGuiCol.FrameBg] = oldFrameBg;
+                ImGuiTheme.Style.Colors[(int)ImGuiCol.FrameBgHovered] = oldFrameBgHovered;
+                ImGuiTheme.Style.Colors[(int)ImGuiCol.FrameBgActive] = oldFrameBgActive;
+                ImGuiTheme.Style.Colors[(int)ImGuiCol.SliderGrab] = oldSliderGrab;
+                ImGuiTheme.Style.Colors[(int)ImGuiCol.SliderGrabActive] = oldSliderGrabActive;
 
                 ImGui.SetNextWindowPos(new(ImGui.GetIO().DisplaySize.X / 2 - 85, CanvasPos.Y + 50));
                 ImGui.BeginChild("Player controls", new Vector2(170, 50), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);

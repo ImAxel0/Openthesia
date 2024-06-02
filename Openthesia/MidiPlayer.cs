@@ -8,6 +8,8 @@ public class MidiPlayer
     public static Playback Playback;
     public static MetricTimeSpan Time;
     public static float Seconds;
+    public static float Milliseconds;
+    public static long Microseconds;
 
     public static bool IsTimerRunning;
     public static float Timer = 0;
@@ -19,6 +21,8 @@ public class MidiPlayer
             var s = (MidiTimeSpan)playbackTime.Time;
             Time = TimeConverter.ConvertTo<MetricTimeSpan>((ITimeSpan)s, MidiFileData.TempoMap);
             Seconds = (float)Time.TotalSeconds;
+            Milliseconds = (float)Time.TotalMilliseconds;
+            Microseconds = Time.TotalMicroseconds;
         }
     }
 
