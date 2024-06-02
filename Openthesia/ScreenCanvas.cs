@@ -28,6 +28,7 @@ public class ScreenCanvas
     private static Vector2 _rectEnd;
     private static bool _isRectMode;
     private static bool _isRightRect;
+    private static float _panVelocity;
 
     private static float _fallSpeed = 2f;
     public static FallSpeeds FallSpeed = FallSpeeds.Default;
@@ -104,6 +105,11 @@ public class ScreenCanvas
     private static bool IsRectInside(Vector2 aMin, Vector2 aMax, Vector2 bMin, Vector2 bMax)
     {
         return aMin.X >= bMin.X && aMax.X <= bMax.X && aMin.Y >= bMin.Y && aMax.Y <= bMax.Y;
+    }
+
+    private static float Lerp(float a, float b, float t)
+    {
+        return a + (b - a) * t;
     }
 
     private static void DrawInputNotes()
@@ -470,20 +476,23 @@ public class ScreenCanvas
                 MidiPlayer.Playback.Speed = cValue;
             }
         }
-        /*
-        if (ImGui.GetIO().MouseDelta.Y != 0 && !MidiPlayer.IsTimerRunning && ImGui.IsMouseDown(ImGuiMouseButton.Right))
+
+        if (ImGui.IsMouseDown(ImGuiMouseButton.Right))
         {
-            float n = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Y / 1000;// < 0 ? -0.1f : 0.1f;
-            n = Math.Clamp(n, -10, 10);
-            Console.WriteLine(n);
-            //Console.WriteLine(ImGui.GetIO().MouseDelta.Y);
-            if (UpDirection) n = -n;
-            var newTime = Math.Clamp(MidiPlayer.Seconds + n, 0, (float)MidiPlayer.Playback.GetDuration<MetricTimeSpan>().TotalSeconds);
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
+            const float interpolationFactor = 0.05f;
+            const float decelerationFactor = 0.75f;
+            float mouseDeltaY = ImGui.GetIO().MouseDelta.Y;
+            if (UpDirection) mouseDeltaY = -mouseDeltaY;
+            _panVelocity = Lerp(_panVelocity, mouseDeltaY, interpolationFactor);
+            _panVelocity *= decelerationFactor;
+            float targetTime = Math.Clamp(MidiPlayer.Seconds + _panVelocity, 0, (float)MidiPlayer.Playback.GetDuration<MetricTimeSpan>().TotalSeconds);
+            var newTime = Lerp(MidiPlayer.Seconds, targetTime, interpolationFactor);
             long ms = (long)(newTime * 1000000);
             MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
-            //MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(0, 0, (int)MidiPlayer.Seconds));
-            MidiPlayer.Timer = newTime * 100 * _fallSpeed;
-        } */
+            MidiPlayer.Seconds = newTime;
+            MidiPlayer.Timer = MidiPlayer.Seconds * 100 * _fallSpeed;
+        }
 
         if (ImGui.IsKeyPressed(ImGuiKey.Space, false))
         {
