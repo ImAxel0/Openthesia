@@ -28,6 +28,7 @@ public class ScreenCanvas
     private static Vector2 _rectEnd;
     private static bool _isRectMode;
     private static bool _isRightRect;
+    private static bool _isHoveringTextBtn;
     private static float _panVelocity;
 
     private static float _fallSpeed = 2f;
@@ -38,6 +39,14 @@ public class ScreenCanvas
         Default,
         Fast,
         Faster
+    }
+
+    public static TextTypes TextType = TextTypes.Velocity;
+    public enum TextTypes
+    {
+        NoteName,
+        Velocity,
+        Octave,
     }
 
     public static void SetFallSpeed(FallSpeeds speed)
@@ -414,10 +423,15 @@ public class ScreenCanvas
                 if (ShowTextNotes)
                 {
                     ImGui.PushFont(FontController.Font16_Icon12);
+                    string noteInfo = Drawings.GetNoteTextAs(TextType, note);
                     var pos = new Vector2(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4,
-                        py2 - length * 100 / 2 - ImGui.CalcTextSize(note.NoteName.ToString()).Y / 2);
-                    drawList.AddText(pos + new Vector2(1), ImGui.GetColorU32(new Vector4(0, 0, 0, 1)), note.NoteName.ToString().Replace("Sharp", "#"));
-                    drawList.AddText(pos, ImGui.GetColorU32(Vector4.One), note.NoteName.ToString().Replace("Sharp", "#"));
+                        py2 - length * 100 / 2 - ImGui.CalcTextSize(noteInfo).Y / 2);
+
+                    if (TextType == TextTypes.NoteName)
+                        noteInfo = noteInfo.Replace("Sharp", "#");
+
+                    drawList.AddText(pos + new Vector2(1), ImGui.GetColorU32(new Vector4(0, 0, 0, 1)), noteInfo);
+                    drawList.AddText(pos, ImGui.GetColorU32(Vector4.One), noteInfo);
                     ImGui.PopFont();
                 }
             }
@@ -448,10 +462,11 @@ public class ScreenCanvas
                 if (ShowTextNotes)
                 {
                     ImGui.PushFont(FontController.Font16_Icon12);
-                    var pos = new Vector2(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width / 2 - ImGui.CalcTextSize(note.NoteName.ToString()).X / 2,
-                        py2 - length * 100 / 2 - ImGui.CalcTextSize(note.NoteName.ToString()).Y / 2);
-                    drawList.AddText(pos + new Vector2(1), ImGui.GetColorU32(new Vector4(0,0,0,1)), note.NoteName.ToString());
-                    drawList.AddText(pos, ImGui.GetColorU32(Vector4.One), note.NoteName.ToString());
+                    string noteInfo = Drawings.GetNoteTextAs(TextType, note);
+                    var pos = new Vector2(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width / 2 - ImGui.CalcTextSize(noteInfo).X / 2,
+                        py2 - length * 100 / 2 - ImGui.CalcTextSize(noteInfo).Y / 2);
+                    drawList.AddText(pos + new Vector2(1), ImGui.GetColorU32(new Vector4(0,0,0,1)), noteInfo);
+                    drawList.AddText(pos, ImGui.GetColorU32(Vector4.One), noteInfo);
                     ImGui.PopFont();
                 }
             }
@@ -461,7 +476,7 @@ public class ScreenCanvas
 
     private static void GetPlaybackInputs()
     {
-        if (!IsLearningMode)
+        if (!IsLearningMode && !_isHoveringTextBtn)
         {
             if (ImGui.GetIO().MouseWheel < 0)
             {
@@ -477,7 +492,7 @@ public class ScreenCanvas
             }
         }
 
-        if (ImGui.IsMouseDown(ImGuiMouseButton.Right))
+        if (ImGui.IsMouseHoveringRect(Vector2.Zero, new(ImGui.GetIO().DisplaySize.X, PianoRenderer.P.Y)) && ImGui.IsMouseDown(ImGuiMouseButton.Right))
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
             const float interpolationFactor = 0.05f;
@@ -769,7 +784,7 @@ public class ScreenCanvas
                     }
                     ImGui.PopFont();
                 }
-
+                
                 ImGui.PushFont(FontController.Font16_Icon16);
                 ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 160, CanvasPos.Y + 50));
                 if (ImGui.Button(showTextIcon, new(50, 50)))
@@ -777,6 +792,43 @@ public class ScreenCanvas
                     _showTextNotes = !_showTextNotes;
                 }
                 ImGui.PopFont();
+                _isHoveringTextBtn = ImGui.IsItemHovered();
+                if (_isHoveringTextBtn)
+                {
+                    if (ImGui.GetIO().MouseWheel > 0)
+                    {
+                        switch (TextType)
+                        {
+                            case TextTypes.Octave:
+                                TextType = TextTypes.Velocity;
+                                break;
+                            case TextTypes.Velocity:
+                                TextType = TextTypes.NoteName;
+                                break;
+                        }
+                    }
+                    else if (ImGui.GetIO().MouseWheel < 0)
+                    {
+                        switch (TextType)
+                        {
+                            case TextTypes.NoteName:
+                                TextType = TextTypes.Velocity;
+                                break;
+                            case TextTypes.Velocity:
+                                TextType = TextTypes.Octave;
+                                break;
+                        }
+                    }
+
+                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 160, CanvasPos.Y + 250));
+                    ImGui.BeginGroup();
+                    foreach (var textType in Enum.GetValues<TextTypes>())
+                    {
+                        var selected = textType == TextType;
+                        ImGui.Selectable(textType.ToString(), selected);
+                    }
+                    ImGui.EndGroup();
+                }               
 
                 ImGui.PushFont(FontController.Font16_Icon16);
                 ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 100, CanvasPos.Y + 50));

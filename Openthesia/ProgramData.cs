@@ -30,6 +30,7 @@ public class ProgramData
         public bool LockTopBar;
         public bool UpDirection;
         public bool ShowTextNotes;
+        public ScreenCanvas.TextTypes TextType;
     }
 
     public static void Initialize()
@@ -89,6 +90,7 @@ public class ProgramData
                 ScreenCanvas.SetLockTopBar(storedSettings.LockTopBar);
                 ScreenCanvas.SetUpDirection(storedSettings.UpDirection);
                 ScreenCanvas.SetTextNotes(storedSettings.ShowTextNotes);
+                ScreenCanvas.TextType = storedSettings.TextType;
             }
             catch (Exception ex)
             {
@@ -124,6 +126,7 @@ public class ProgramData
             LockTopBar = ScreenCanvas.LockTopBar,
             UpDirection = ScreenCanvas.UpDirection,
             ShowTextNotes = ScreenCanvas.ShowTextNotes,
+            TextType = ScreenCanvas.TextType,
         };
 
         string json = JsonConvert.SerializeObject(data, settings);

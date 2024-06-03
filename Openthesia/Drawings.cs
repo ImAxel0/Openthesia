@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using Melanchall.DryWetMidi.Interaction;
 using System.Numerics;
 
 namespace Openthesia;
@@ -59,5 +60,20 @@ public class Drawings
         ImGui.TextUnformatted(description);
         ImGui.PopTextWrapPos();
         ImGui.EndTooltip();
+    }
+
+    public static string GetNoteTextAs(ScreenCanvas.TextTypes textType, Note note)
+    {
+        switch (textType)
+        {
+            case ScreenCanvas.TextTypes.NoteName:
+                return note.NoteName.ToString();
+            case ScreenCanvas.TextTypes.Velocity:
+                return note.Velocity.ToString();
+            case ScreenCanvas.TextTypes.Octave:
+                return note.Octave.ToString();
+            default:
+                return note.NoteName.ToString();
+        }
     }
 }
