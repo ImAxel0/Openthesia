@@ -103,11 +103,13 @@ public class ScreenCanvas
             if (key % 7 == 2)
             {
                 drawList.AddLine(CanvasPos + new Vector2(key * PianoRenderer.Width, 0), 
-                    new(PianoRenderer.P.X + key * PianoRenderer.Width, PianoRenderer.P.Y), ImGui.GetColorU32(new Vector4(Vector3.One, 0.08f)), 3);
+                    new(PianoRenderer.P.X + key * PianoRenderer.Width, PianoRenderer.P.Y), ImGui.GetColorU32(new Vector4(Vector3.One, 0.08f)), 2);
             }
-            else
-                drawList.AddLine(CanvasPos + new Vector2(key * PianoRenderer.Width, 0), 
+            else if (key % 7 == 5)
+            {
+                drawList.AddLine(CanvasPos + new Vector2(key * PianoRenderer.Width, 0),
                     new(PianoRenderer.P.X + key * PianoRenderer.Width, PianoRenderer.P.Y), ImGui.GetColorU32(new Vector4(Vector3.One, 0.06f)));
+            }
         }
     }
 
@@ -723,6 +725,10 @@ public class ScreenCanvas
                     long ms = (long)(MidiPlayer.Seconds * 1000000);
                     MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
                     MidiPlayer.Timer = MidiPlayer.Seconds * 100 * _fallSpeed;
+                }
+                if (ImGui.IsItemHovered() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+                {
+                    ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
                 }
                 var pBarHeight = ImGui.GetItemRectSize().Y;
                 var playbackPercentage = MidiPlayer.Seconds * 100 / (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds;
