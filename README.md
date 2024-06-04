@@ -32,11 +32,11 @@ Download the latest setup from the [releases](https://github.com/ImAxel0/Openthe
 # Gallery
 ![openthesia_home](https://github.com/ImAxel0/Openthesia/assets/124681710/bf9d0fc8-55a9-4583-9514-da29bd5159dd)
 
-![openthesia_screen2](https://github.com/ImAxel0/Openthesia/assets/124681710/a01bad3d-8ee0-44d0-a472-37cee41c087b)
+![playback](https://github.com/ImAxel0/Openthesia/assets/124681710/bfccfaac-cb8f-4ffc-87ac-23c0ced6b0e8)
 
-![openthesia_playmode](https://github.com/ImAxel0/Openthesia/assets/124681710/38e9ab18-7b03-4e08-bd26-fe3f993cec1a)
+![openthesia_playmode](https://github.com/ImAxel0/Openthesia/assets/124681710/915717df-796a-4697-904a-8582321f3de6)
 
-![openthesia_settings](https://github.com/ImAxel0/Openthesia/assets/124681710/6f9a2ca9-956b-470a-a755-b1729de94cbf)
+![openthesia_settings](https://github.com/ImAxel0/Openthesia/assets/124681710/7e8afe03-764c-4ff1-af9d-2337b03edd23)
 
 ## Thanks to
 
