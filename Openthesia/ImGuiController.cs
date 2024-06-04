@@ -136,6 +136,26 @@ public class ImGuiController : IDisposable
         var img = new ImageSharpTexture(stream);
         var dimg = img.CreateDeviceTexture(_gd, _gd.ResourceFactory);
         ProgramData.LogoImage = _controller.GetOrCreateImGuiBinding(_gd.ResourceFactory, dimg);
+
+        // White key
+        TryGetEmbeddedResourceBytes("white", out var cData);
+        Stream stream2 = new MemoryStream();
+        stream2.Write(cData);
+        stream2.Position = 0;
+
+        var img2 = new ImageSharpTexture(stream2);
+        var dimg2 = img2.CreateDeviceTexture(_gd, _gd.ResourceFactory);
+        Drawings.C = _controller.GetOrCreateImGuiBinding(_gd.ResourceFactory, dimg2);
+
+        // Black key
+        TryGetEmbeddedResourceBytes("black", out var cSharpData);
+        Stream stream3 = new MemoryStream();
+        stream3.Write(cSharpData);
+        stream3.Position = 0;
+
+        var img3 = new ImageSharpTexture(stream3);
+        var dimg3 = img3.CreateDeviceTexture(_gd, _gd.ResourceFactory);
+        Drawings.CSharp = _controller.GetOrCreateImGuiBinding(_gd.ResourceFactory, dimg3);
     }
 
     public void WindowResized(int width, int height)

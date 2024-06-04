@@ -417,11 +417,11 @@ public class ScreenCanvas
                         );
                     }
                 }
-
+                
                 drawList.AddRectFilled(new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4, py1),
                       new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4, py2),
                       ImGui.GetColorU32(col * 0.7f), 5, ImDrawFlags.RoundCornersAll);
-
+                
                 if (ShowTextNotes)
                 {
                     ImGui.PushFont(FontController.Font16_Icon12);
@@ -456,11 +456,11 @@ public class ScreenCanvas
                         );
                     }
                 }
-
+                
                 drawList.AddRectFilled(new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width, py1),
                     new(PianoRenderer.P.X + PianoRenderer.WhiteNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width, py2),
                     ImGui.GetColorU32(col), 5, ImDrawFlags.RoundCornersAll);
-
+                
                 if (ShowTextNotes)
                 {
                     ImGui.PushFont(FontController.Font16_Icon12);

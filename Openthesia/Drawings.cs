@@ -6,6 +6,9 @@ namespace Openthesia;
 
 public class Drawings
 {
+    public static IntPtr C;
+    public static IntPtr CSharp;
+
     public static void RenderMatrixBackground()
     {
         var drawList = ImGui.GetWindowDrawList();

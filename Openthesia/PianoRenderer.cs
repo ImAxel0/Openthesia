@@ -8,7 +8,7 @@ namespace Openthesia;
 public class PianoRenderer
 {
     static uint _black = ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#141414"));
-    static uint _white = ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#FFFDEF"));
+    static uint _white = ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#FFFFFF"));
     static uint _whitePressed = ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#888888"));
     static uint _blackPressed = ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#888888"));
 
@@ -62,6 +62,7 @@ public class PianoRenderer
 
             var offset = IOHandle.PressedKeys.Contains(cur_key) ? 2 : 0;
 
+            /*
             draw_list.AddRectFilled(
                     new Vector2(P.X + key * Width, P.Y) + new Vector2(offset, 0),
                     new Vector2(P.X + key * Width + Width, P.Y + Height) + new Vector2(offset, 0),
@@ -69,7 +70,11 @@ public class PianoRenderer
             draw_list.AddRect(
                     new(P.X + key * Width, P.Y),
                     new(P.X + key * Width + Width, P.Y + Height),
-                    _black, 0);
+                    _black, 0); */
+
+            draw_list.AddImageRounded(Drawings.C,
+                new Vector2(P.X + key * Width, P.Y) + new Vector2(offset, 0),
+                new Vector2(P.X + key * Width + Width, P.Y + Height) + new Vector2(offset, 0), Vector2.Zero, Vector2.One, col, 5, ImDrawFlags.RoundCornersBottom);
 
             if (WhiteNoteToKey.Count < 52)
                 WhiteNoteToKey.Add((SevenBitNumber)cur_key, key);
@@ -97,7 +102,7 @@ public class PianoRenderer
 
             if (KeysUtils.HasBlack(key))
             {
-                uint col = _black;
+                uint col = ImGui.GetColorU32(Vector4.One);
 
                 if (ImGui.IsMouseHoveringRect(new(P.X + key * Width + Width * 3 / 4, P.Y), 
                     new(P.X + key * Width + Width * 5 / 4 + 1, P.Y + Height / 1.5f)) && ImGui.IsMouseClicked(ImGuiMouseButton.Left)
@@ -125,14 +130,22 @@ public class PianoRenderer
                     col = color;
                 }
 
+                var offset = IOHandle.PressedKeys.Contains(cur_key) ? 1 : 0;
+
+                /*
                 draw_list.AddRectFilledMultiColor(new Vector2(P.X + key * Width + Width * 3 / 4, P.Y),
                         new Vector2(P.X + key * Width + Width * 5 / 4 + 1, P.Y + Height / 1.5f), 
                         col, col, ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#666666")), col);
-
+                
                 draw_list.AddRect(
                         new Vector2(P.X + key * Width + Width * 3 / 4, P.Y),
                         new Vector2(P.X + key * Width + Width * 5 / 4 + 1, P.Y + Height / 1.5f),
                         _black, 0);
+                */
+
+                draw_list.AddImage(Drawings.CSharp,
+                    new Vector2(P.X + key * Width + Width * 3 / 4, P.Y),
+                    new Vector2(P.X + key * Width + Width * 5 / 4 + 1, P.Y + Height / 1.5f) + new Vector2(offset), Vector2.Zero, Vector2.One, col);
 
                 cur_key += 2;
             }

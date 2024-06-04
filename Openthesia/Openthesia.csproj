@@ -10,6 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\ckey.png" />
+    <None Remove="Resources\csharp.png" />
     <None Remove="Resources\Font\Inter.ttf" />
     <None Remove="Resources\Font\Roboto-Regular.ttf" />
     <None Remove="Resources\imgui-frag.hlsl.bytes" />
@@ -22,6 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Keys\white.png" />
+    <EmbeddedResource Include="Resources\Keys\black.png" />
     <EmbeddedResource Include="Resources\Font\Inter.ttf" />
     <EmbeddedResource Include="Resources\Font\Roboto-Regular.ttf" />
     <EmbeddedResource Include="Resources\imgui-frag.hlsl.bytes" />
