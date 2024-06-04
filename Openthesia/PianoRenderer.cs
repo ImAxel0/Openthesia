@@ -10,7 +10,7 @@ public class PianoRenderer
     static uint _black = ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#141414"));
     static uint _white = ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#FFFFFF"));
     static uint _whitePressed = ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#888888"));
-    static uint _blackPressed = ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#888888"));
+    static uint _blackPressed = ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#555555"));
 
     public static float Width;
     public static float Height;
@@ -131,6 +131,7 @@ public class PianoRenderer
                 }
 
                 var offset = IOHandle.PressedKeys.Contains(cur_key) ? 1 : 0;
+                var blackImage = IOHandle.PressedKeys.Contains(cur_key) ? Drawings.CSharpWhite : Drawings.CSharp;
 
                 /*
                 draw_list.AddRectFilledMultiColor(new Vector2(P.X + key * Width + Width * 3 / 4, P.Y),
@@ -143,7 +144,7 @@ public class PianoRenderer
                         _black, 0);
                 */
 
-                draw_list.AddImage(Drawings.CSharp,
+                draw_list.AddImage(blackImage,
                     new Vector2(P.X + key * Width + Width * 3 / 4, P.Y),
                     new Vector2(P.X + key * Width + Width * 5 / 4 + 1, P.Y + Height / 1.5f) + new Vector2(offset), Vector2.Zero, Vector2.One, col);
 

@@ -16,6 +16,7 @@
     <None Remove="Resources\Font\Roboto-Regular.ttf" />
     <None Remove="Resources\imgui-frag.hlsl.bytes" />
     <None Remove="Resources\imgui-vertex.hlsl.bytes" />
+    <None Remove="Resources\Keys\wsharp.png" />
     <None Remove="Resources\logoimg.png" />
   </ItemGroup>
 
@@ -30,6 +31,7 @@
     <EmbeddedResource Include="Resources\Font\Roboto-Regular.ttf" />
     <EmbeddedResource Include="Resources\imgui-frag.hlsl.bytes" />
     <EmbeddedResource Include="Resources\imgui-vertex.hlsl.bytes" />
+    <EmbeddedResource Include="Resources\Keys\wsharp.png" />
     <EmbeddedResource Include="Resources\logoimg.png" />
   </ItemGroup>
 

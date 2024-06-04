@@ -8,6 +8,7 @@ public class Drawings
 {
     public static IntPtr C;
     public static IntPtr CSharp;
+    public static IntPtr CSharpWhite;
 
     public static void RenderMatrixBackground()
     {
