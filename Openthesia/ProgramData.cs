@@ -23,6 +23,7 @@ public class ProgramData
         public bool NeonFx;
         public bool KeyPressColorMatch;
         public bool FpsCounter;
+        public int NoteRoundness;
         public Settings.Themes Theme;
         public Vector4 MainBg;
         public Vector4 R_HandColor;
@@ -83,6 +84,7 @@ public class ProgramData
                 Settings.SetNeonFx(storedSettings.NeonFx);
                 Settings.SetKeyPressColorMatch(storedSettings.KeyPressColorMatch);
                 Settings.SetFpsCounter(storedSettings.FpsCounter);
+                Settings.SetNoteRoundness(storedSettings.NoteRoundness);
                 Settings.SetTheme(storedSettings.Theme);
                 Settings.MainBg = storedSettings.MainBg;
                 Settings.R_HandColor = storedSettings.R_HandColor;
@@ -118,6 +120,7 @@ public class ProgramData
             AnimatedBackground = Settings.AnimatedBackground,
             NeonFx = Settings.NeonFx,
             KeyPressColorMatch = Settings.KeyPressColorMatch,
+            NoteRoundness = Settings.NoteRoundness,
             FpsCounter = Settings.FpsCounter,   
             Theme = Settings.Theme,
             MainBg = Settings.MainBg,

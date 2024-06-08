@@ -37,6 +37,9 @@ public class Settings
     private static bool _fpsCounter;
     public static bool FpsCounter { get { return _fpsCounter; } }
 
+    private static int _noteRoundness = 5;
+    public static int NoteRoundness { get { return _noteRoundness; } }
+
     public static Themes Theme { get; private set; } = Themes.Sky;
     public enum Themes
     {
@@ -78,6 +81,11 @@ public class Settings
     public static void SetFpsCounter(bool onoff)
     {
         _fpsCounter = onoff;
+    }
+
+    public static void SetNoteRoundness(int value)
+    {
+        _noteRoundness = value;
     }
 
     public static void SetTheme(Themes theme)
@@ -211,6 +219,12 @@ public class Settings
         }
         ImGui.PopFont();
 
+        ImGui.PushFont(FontController.Title);
+        var textPos = new Vector2(ImGui.GetIO().DisplaySize.X / 2 - ImGui.CalcTextSize("SETTINGS").X / 2, ImGui.GetIO().DisplaySize.Y / 20);
+        ImGui.SetCursorPos(textPos);
+        ImGui.Text("SETTINGS");
+        ImGui.PopFont();
+
         ImGuiTheme.Style.FramePadding = new(15);
         ImGuiTheme.PushButton(ImGuiTheme.HtmlToVec4("#0284C7"), ImGuiTheme.HtmlToVec4("#0284C7"), ImGuiTheme.HtmlToVec4("#0284C7"));
         ImGuiTheme.Style.WindowPadding = new(10);
@@ -331,6 +345,10 @@ public class Settings
         ImGui.Dummy(new(50));
 
         ImGui.Text($"LOOK AND FEEL {FontAwesome6.Paintbrush}");
+        ImGui.SliderInt("Note block roundness", ref _noteRoundness, 0, 15);
+
+        ImGui.Dummy(new(10));
+
         ImGui.ColorEdit4("Background color", ref MainBg, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha | ImGuiColorEditFlags.NoDragDrop);
         ImGui.SameLine();
         ImGui.ColorEdit4("Right Hand color", ref R_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha | ImGuiColorEditFlags.NoDragDrop);
