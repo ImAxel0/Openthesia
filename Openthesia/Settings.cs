@@ -37,7 +37,7 @@ public class Settings
     private static bool _fpsCounter;
     public static bool FpsCounter { get { return _fpsCounter; } }
 
-    private static int _noteRoundness = 5;
+    private static int _noteRoundness = 7;
     public static int NoteRoundness { get { return _noteRoundness; } }
 
     public static Themes Theme { get; private set; } = Themes.Sky;

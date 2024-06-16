@@ -29,6 +29,7 @@ public class ScreenCanvas
     private static bool _isRectMode;
     private static bool _isRightRect;
     private static bool _isHoveringTextBtn;
+    private static bool _isProgressBarHovered;
     private static float _panVelocity;
 
     private static float _fallSpeed = 2f;
@@ -307,7 +308,7 @@ public class ScreenCanvas
                     }
                 }
 
-                if (IsEditMode)
+                if (IsEditMode && !_isProgressBarHovered)
                 {
                     if (ImGui.GetIO().KeyCtrl && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_isRectMode)
                     {
@@ -768,14 +769,15 @@ public class ScreenCanvas
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.SliderGrab] = Settings.R_HandColor;
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.SliderGrabActive] = Settings.R_HandColor;
 
-                if (ImGui.SliderFloat("##Progress slider", ref MidiPlayer.Seconds, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds, "%.1f", 
+                if (ImGui.SliderFloat("##Progress slider", ref MidiPlayer.Seconds, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds, "%.1f",
                     ImGuiSliderFlags.NoRoundToFormat | ImGuiSliderFlags.AlwaysClamp | ImGuiSliderFlags.NoInput))
                 {
                     long ms = (long)(MidiPlayer.Seconds * 1000000);
                     MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
                     MidiPlayer.Timer = MidiPlayer.Seconds * 100 * _fallSpeed;
                 }
-                if (ImGui.IsItemHovered() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+                _isProgressBarHovered = ImGui.IsItemHovered();
+                if (_isProgressBarHovered && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
                 {
                     ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
                 }
