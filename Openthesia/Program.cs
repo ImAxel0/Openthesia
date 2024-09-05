@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Veldrid.StartupUtilities;
 using System.Numerics;
 using ImGuiNET;
+using Vanara.PInvoke;
 
 namespace Openthesia;
 
@@ -18,6 +19,8 @@ class Program
 
     static void Main(string[] args)
     {
+        User32.SetProcessDPIAware();
+
         VeldridStartup.CreateWindowAndGraphicsDevice(
             new WindowCreateInfo(50, 50, 1280, 720, WindowState.Maximized, $"Openthesia {ProgramData.ProgramVersion}"),
             new GraphicsDeviceOptions(false, null, true, ResourceBindingModel.Improved, true, true),
@@ -50,12 +53,6 @@ class Program
             InputSnapshot snapshot = _window.PumpEvents();
             if (!_window.Exists) { break; }
             _controller.Update(deltaTime, snapshot);
-
-            if (_window.WindowState == WindowState.Minimized)
-            {
-                Thread.Sleep(100);
-                continue;
-            }
 
             if (ImGui.IsKeyPressed(ImGuiKey.F11, false))
             {
