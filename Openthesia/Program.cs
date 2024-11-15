@@ -5,6 +5,7 @@ using Veldrid.StartupUtilities;
 using System.Numerics;
 using ImGuiNET;
 using Vanara.PInvoke;
+using Newtonsoft.Json;
 
 namespace Openthesia;
 
@@ -26,19 +27,24 @@ class Program
             new GraphicsDeviceOptions(false, null, true, ResourceBindingModel.Improved, true, true),
             out _window,
             out _gd);
+
+        _cl = _gd.ResourceFactory.CreateCommandList();
+        _controller = new ImGuiController(_gd, _gd.MainSwapchain.Framebuffer.OutputDescription, _window.Width, _window.Height);
+
         _window.Resized += () =>
         {
-            if (_window.Width < 1280)
-                _window.Width = 1280;
+            int minWidth = (int)(1280 * FontController.DSF);
+            int minHeigth = (int)(720 * FontController.DSF);
 
-            if (_window.Height < 720)
-                _window.Height = 720;
+            if (_window.Width < minWidth)
+                _window.Width = minWidth;
+
+            if (_window.Height < minHeigth)
+                _window.Height = minHeigth;
 
             _gd.MainSwapchain.Resize((uint)_window.Width, (uint)_window.Height);
             _controller.WindowResized(_window.Width, _window.Height);
         };
-        _cl = _gd.ResourceFactory.CreateCommandList();
-        _controller = new ImGuiController(_gd, _gd.MainSwapchain.Framebuffer.OutputDescription, _window.Width, _window.Height);
 
         var stopwatch = Stopwatch.StartNew();
         float deltaTime = 0f;

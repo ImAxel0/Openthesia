@@ -213,7 +213,7 @@ public class Settings
 
         ImGui.PushFont(FontController.Font16_Icon16);
         ImGui.SetCursorScreenPos(new(22, 50));
-        if (ImGui.Button(FontAwesome6.ArrowLeftLong, new(100, 50)))
+        if (ImGui.Button(FontAwesome6.ArrowLeftLong, new Vector2(100, 50) * FontController.DSF))
         {
             Router.SetRoute(Router.Routes.Home);
         }
@@ -225,7 +225,7 @@ public class Settings
         ImGui.Text("SETTINGS");
         ImGui.PopFont();
 
-        ImGuiTheme.Style.FramePadding = new(15);
+        ImGuiTheme.Style.FramePadding = new(15 * FontController.DSF);
         ImGuiTheme.PushButton(ImGuiTheme.HtmlToVec4("#0284C7"), ImGuiTheme.HtmlToVec4("#0284C7"), ImGuiTheme.HtmlToVec4("#0284C7"));
         ImGuiTheme.Style.WindowPadding = new(10);
 
@@ -320,8 +320,8 @@ public class Settings
 
         ImGui.EndTable();
 
-        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - 100);
-        if (ImGui.Button(FontAwesome6.FolderPlus, new(100, 50)))
+        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - 100 * FontController.DSF);
+        if (ImGui.Button(FontAwesome6.FolderPlus, new Vector2(100, 50) * FontController.DSF))
         {
             var dlg = new FolderPicker();
             dlg.InputPath = "C:\\";

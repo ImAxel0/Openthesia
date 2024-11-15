@@ -42,7 +42,7 @@ public class PianoRenderer
                     new Melanchall.DryWetMidi.Multimedia.MidiEventReceivedEventArgs(new NoteOnEvent((SevenBitNumber)cur_key, new SevenBitNumber(127))));
                 Settings.ODevice.SendEvent(new NoteOnEvent((SevenBitNumber)cur_key, new SevenBitNumber(127)));
             }
-
+            
             if (ImGui.IsMouseReleased(ImGuiMouseButton.Left) && !Settings.KeyboardInput)
             {
                 if (IOHandle.PressedKeys.Contains(cur_key))
@@ -56,6 +56,18 @@ public class PianoRenderer
 
             if (IOHandle.PressedKeys.Contains(cur_key))
             {
+                /* partial fix to keys color match
+                if (Settings.KeyPressColorMatch)
+                {
+                    int noteIndex = MidiFileData.Notes.ToList().IndexOf(MidiFileData.Notes.ToList().Find(x => x.NoteNumber == cur_key));
+                    var color = LeftRightData.S_IsRightNote[noteIndex] ? ImGui.GetColorU32(Settings.R_HandColor) : ImGui.GetColorU32(Settings.L_HandColor);
+                    col = color;
+                }
+                else
+                {
+                    col = _whitePressed;
+                }
+                */
                 var color = Settings.KeyPressColorMatch ? ImGui.GetColorU32(Settings.R_HandColor) : _whitePressed;
                 col = color;
             }
@@ -83,7 +95,7 @@ public class PianoRenderer
             {
                 var text = $"C{cCount}";
                 ImGui.GetForegroundDrawList().AddText(new(P.X + key * Width + Width + (Width / 2 - ImGui.CalcTextSize(text).X / 2), 
-                    P.Y + Height - 25), _black, text);
+                    P.Y + Height - 25 * FontController.DSF), _black, text);
                 cCount++;
             }
 
@@ -103,7 +115,7 @@ public class PianoRenderer
             if (KeysUtils.HasBlack(key))
             {
                 uint col = ImGui.GetColorU32(Vector4.One);
-
+               
                 if (ImGui.IsMouseHoveringRect(new(P.X + key * Width + Width * 3 / 4, P.Y), 
                     new(P.X + key * Width + Width * 5 / 4 + 1, P.Y + Height / 1.5f)) && ImGui.IsMouseClicked(ImGuiMouseButton.Left)
                     && !Settings.KeyboardInput)
@@ -112,7 +124,7 @@ public class PianoRenderer
                         new Melanchall.DryWetMidi.Multimedia.MidiEventReceivedEventArgs(new NoteOnEvent((SevenBitNumber)cur_key, new SevenBitNumber(127))));
                     Settings.ODevice.SendEvent(new NoteOnEvent((SevenBitNumber)cur_key, new SevenBitNumber(127)));
                 }
-
+                
                 if (ImGui.IsMouseReleased(ImGuiMouseButton.Left) && !Settings.KeyboardInput)
                 {
                     if (IOHandle.PressedKeys.Contains(cur_key))
@@ -125,6 +137,18 @@ public class PianoRenderer
 
                 if (IOHandle.PressedKeys.Contains(cur_key))
                 {
+                    /* partial fix to keys color match
+                    if (Settings.KeyPressColorMatch)
+                    {
+                        int noteIndex = MidiFileData.Notes.ToList().IndexOf(MidiFileData.Notes.ToList().Find(x => x.NoteNumber == cur_key));
+                        var color = LeftRightData.S_IsRightNote[noteIndex] ? ImGui.GetColorU32(Settings.R_HandColor) : ImGui.GetColorU32(Settings.L_HandColor);
+                        col = color;
+                    }
+                    else
+                    {
+                        col = _blackPressed;
+                    }
+                    */
                     var v3 = new Vector3(Settings.R_HandColor.X, Settings.R_HandColor.Y, Settings.R_HandColor.Z);
                     var color = Settings.KeyPressColorMatch ? ImGui.GetColorU32(new Vector4(v3, 1)) : _blackPressed;
                     col = color;

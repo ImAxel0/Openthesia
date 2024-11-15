@@ -9,7 +9,7 @@ public class Home
     private static Vector2 _btnHoverOffset = new(2);
     private static Vector2 _titleShadowOffset = new(3);
     private static Vector2 _buttonsShadowOffset = new(4);
-    private static Vector2 _buttonsSize = new(300, 50);
+    private static Vector2 _buttonsSize = new Vector2(300, 50);
     private static uint _titleShadowColor = ImGui.GetColorU32(new Vector4(0.13f, 0.83f, 0.93f, 0.5f));
     private static bool _playMidi;
     private static bool _playMode;
@@ -36,6 +36,7 @@ public class Home
 
         if (ImGui.GetIO().DisplaySize.Y > 950)
         {
+            // title
             ImGui.PushFont(FontController.Title);
             var textPos = new Vector2(ImGui.GetIO().DisplaySize.X / 2 - ImGui.CalcTextSize("OPENTHESIA").X / 2, ImGui.GetIO().DisplaySize.Y / 10);
             ImGui.SetCursorPos(textPos + _titleShadowOffset);
@@ -45,8 +46,9 @@ public class Home
             ImGui.PopFont();
         }
 
-        ImGui.SetCursorPos(ImGui.GetIO().DisplaySize / 2 - new Vector2(125, 300));
-        ImGui.Image(ProgramData.LogoImage, new(250, 250));
+        // logo
+        ImGui.SetCursorPos(ImGui.GetIO().DisplaySize / 2 - new Vector2(125, 300) * FontController.DSF);
+        ImGui.Image(ProgramData.LogoImage, new Vector2(250, 250) * FontController.DSF);
         if (ImGui.IsItemHovered())
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -56,8 +58,9 @@ public class Home
             }
         }
 
-        ImGui.SetNextWindowPos(ImGui.GetIO().DisplaySize / 2 - new Vector2(150, 0));
-        if (ImGui.BeginChild("Home buttons", new(400, 300)))
+        // home buttons
+        ImGui.SetNextWindowPos(ImGui.GetIO().DisplaySize / 2 - new Vector2(150, 0) * FontController.DSF);
+        if (ImGui.BeginChild("Home buttons", new Vector2(400, 300) * FontController.DSF))
         {
             ImGuiTheme.PushButton(ImGuiTheme.HtmlToVec4("#31CB15"), ImGuiTheme.HtmlToVec4("#20870E"), ImGuiTheme.HtmlToVec4("#31CB15"));
             var drawList = ImGui.GetWindowDrawList();
@@ -68,15 +71,15 @@ public class Home
                 // Draw shadow rectangle
                 Vector2 buttonPosScreen = ImGui.GetCursorScreenPos();
                 Vector2 shadowPosScreen = buttonPosScreen + _buttonsShadowOffset;
-                drawList.AddRectFilled(shadowPosScreen, shadowPosScreen + _buttonsSize, ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#31CB15")), 5.0f);
+                drawList.AddRectFilled(shadowPosScreen, shadowPosScreen + _buttonsSize * FontController.DSF, ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#31CB15")), 5.0f);
             }
-            if (ImGui.Button($"PLAY MIDI FILE", _buttonsSize))
+            if (ImGui.Button($"PLAY MIDI FILE", _buttonsSize * FontController.DSF))
             {
                 Router.SetRoute(Router.Routes.MidiList);
             }
             _playMidi = ImGui.IsItemHovered();
 
-            ImGui.Dummy(new(5));
+            ImGui.Dummy(new(5 * FontController.DSF));
 
             ImGuiTheme.PushButton(ImGuiTheme.HtmlToVec4("#0EA5E9"), ImGuiTheme.HtmlToVec4("#096E9B"), ImGuiTheme.HtmlToVec4("#0EA5E9"));
             if (_playMode)
@@ -85,16 +88,16 @@ public class Home
                 // Draw shadow rectangle
                 Vector2 buttonPosScreen = ImGui.GetCursorScreenPos();
                 Vector2 shadowPosScreen = buttonPosScreen + _buttonsShadowOffset;
-                drawList.AddRectFilled(shadowPosScreen, shadowPosScreen + _buttonsSize, ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#0EA5E9")), 5.0f);
+                drawList.AddRectFilled(shadowPosScreen, shadowPosScreen + _buttonsSize * FontController.DSF, ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#0EA5E9")), 5.0f);
             }
-            if (ImGui.Button($"PLAY MODE", _buttonsSize))
+            if (ImGui.Button($"PLAY MODE", _buttonsSize * FontController.DSF))
             {
                 Router.SetRoute(Router.Routes.PlayMode);
             }
             _playMode = ImGui.IsItemHovered();
 
             ImGuiTheme.PopButton();
-            ImGui.Dummy(new(5));
+            ImGui.Dummy(new(5 * FontController.DSF));
 
             if (_settings)
             {
@@ -102,15 +105,15 @@ public class Home
                 // Draw shadow rectangle
                 Vector2 buttonPosScreen = ImGui.GetCursorScreenPos();
                 Vector2 shadowPosScreen = buttonPosScreen + _buttonsShadowOffset;
-                drawList.AddRectFilled(shadowPosScreen, shadowPosScreen + _buttonsSize, ImGui.GetColorU32(ImGuiTheme.Style.Colors[(int)ImGuiCol.Button]), 5.0f);
+                drawList.AddRectFilled(shadowPosScreen, shadowPosScreen + _buttonsSize * FontController.DSF, ImGui.GetColorU32(ImGuiTheme.Style.Colors[(int)ImGuiCol.Button]), 5.0f);
             }
-            if (ImGui.Button($"SETTINGS", _buttonsSize))
+            if (ImGui.Button($"SETTINGS", _buttonsSize * FontController.DSF))
             {
                 Router.SetRoute(Router.Routes.Settings);
             }
             _settings = ImGui.IsItemHovered();
 
-            ImGui.Dummy(new(5));
+            ImGui.Dummy(new(5 * FontController.DSF));
 
             ImGuiTheme.PushButton(ImGuiTheme.HtmlToVec4("#B33838"), ImGuiTheme.HtmlToVec4("#772525"), ImGuiTheme.HtmlToVec4("#B33838"));
             if (_exit)
@@ -119,9 +122,9 @@ public class Home
                 // Draw shadow rectangle
                 Vector2 buttonPosScreen = ImGui.GetCursorScreenPos();
                 Vector2 shadowPosScreen = buttonPosScreen + _buttonsShadowOffset;
-                drawList.AddRectFilled(shadowPosScreen, shadowPosScreen + _buttonsSize, ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#B33838")), 5.0f);
+                drawList.AddRectFilled(shadowPosScreen, shadowPosScreen + _buttonsSize * FontController.DSF, ImGui.GetColorU32(ImGuiTheme.HtmlToVec4("#B33838")), 5.0f);
             }
-            if (ImGui.Button($"EXIT", _buttonsSize))
+            if (ImGui.Button($"EXIT", _buttonsSize * FontController.DSF))
             {
                 Program.IsRunning = false;
             }

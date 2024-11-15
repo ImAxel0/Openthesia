@@ -4,6 +4,10 @@ namespace Openthesia;
 
 public class FontController
 {
+    /// <summary>
+    /// dpi scale factor to handle ui size and position
+    /// </summary>
+    public static float DSF = 1f;
     public static ImFontPtr Title;
     public static ImFontPtr BigIcon;
     public static ImFontPtr Font16_Icon12;

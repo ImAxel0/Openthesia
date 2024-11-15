@@ -18,6 +18,12 @@ public class ScreenCanvas
     static bool _isLearningMode;
     static bool _isEditMode;
 
+    // controls state to handle top bar hiding
+    static bool _leftHandColorPicker;
+    static bool _rightHandColorPicker;
+    static bool _comboFallSpeed;
+    static bool _comboPlaybackSpeed;
+
     public static bool LockTopBar { get { return _lockTopBar; } }
     public static bool UpDirection { get { return _upDirection; } }
     public static bool ShowTextNotes { get { return _showTextNotes; } }
@@ -676,34 +682,36 @@ public class ScreenCanvas
         
         GetInputs();
 
-        var showTopBar = ImGui.IsMouseHoveringRect(Vector2.Zero, new(ImGui.GetIO().DisplaySize.X, 150));
+        var showTopBar = ImGui.IsMouseHoveringRect(Vector2.Zero, new(ImGui.GetIO().DisplaySize.X, 300));
+        if (_comboFallSpeed || _comboPlaybackSpeed || _leftHandColorPicker || _rightHandColorPicker)
+            showTopBar = true;
 
         if (playMode)
         {
             if (showTopBar || LockTopBar)
             {
-                ImGui.SetNextWindowPos(new(ImGui.GetIO().DisplaySize.X / 2 - 85, CanvasPos.Y + 50));
-                ImGui.BeginChild("Player controls", new Vector2(170, 50), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+                ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X / 2 - 85 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+                ImGui.BeginChild("Player controls", new Vector2(170, 50) * FontController.DSF, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
                 var recordColor = MidiRecording.IsRecording() ? new Vector4(1, 0, 0, 1) : Vector4.One;
 
                 ImGui.PushFont(FontController.Font16_Icon16);
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = recordColor;
-                if (ImGui.Button($"{FontAwesome6.CircleDot}", new(50, ImGui.GetWindowSize().Y)))
+                if (ImGui.Button($"{FontAwesome6.CircleDot}", new(50 * FontController.DSF, ImGui.GetWindowSize().Y)))
                 {
                     MidiRecording.StartRecording();
                 }
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = Vector4.One;
                 ImGui.SameLine();
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = new(0.70f, 0.22f, 0.22f, 1);
-                if (ImGui.Button($"{FontAwesome6.Stop}", new(50, ImGui.GetWindowSize().Y)))
+                if (ImGui.Button($"{FontAwesome6.Stop}", new(50 * FontController.DSF, ImGui.GetWindowSize().Y)))
                 {
                     MidiRecording.StopRecording();
                 }
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = Vector4.One;
                 ImGui.SameLine();
                 ImGui.PushFont(FontController.Font16_Icon16);
-                if (ImGui.Button($"{FontAwesome6.SdCard}", new(50, 50)))
+                if (ImGui.Button($"{FontAwesome6.SdCard}", new(50 * FontController.DSF, ImGui.GetWindowSize().Y)))
                 {
                     MidiRecording.SaveRecordingToFile();
                 }
@@ -715,8 +723,8 @@ public class ScreenCanvas
 
                 if (!MidiRecording.IsRecording())
                 {
-                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220, CanvasPos.Y + 50));
-                    if (ImGui.Button("View last recording", new(180, 50)))
+                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+                    if (ImGui.Button("View last recording", new Vector2(180, 50) * FontController.DSF))
                     {
                         var recordedMidi = MidiRecording.GetRecordedMidi();
                         if (recordedMidi != null)
@@ -731,7 +739,7 @@ public class ScreenCanvas
                         }
                     }
 
-                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220, CanvasPos.Y + 110));
+                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220 * FontController.DSF, CanvasPos.Y + 110 * FontController.DSF));
                     if (ImGui.BeginCombo("##Fall speed", $"{FallSpeed}",
                         ImGuiComboFlags.WidthFitPreview | ImGuiComboFlags.HeightLarge))
                     {
@@ -793,14 +801,14 @@ public class ScreenCanvas
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.SliderGrab] = oldSliderGrab;
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.SliderGrabActive] = oldSliderGrabActive;
 
-                ImGui.SetNextWindowPos(new(ImGui.GetIO().DisplaySize.X / 2 - 85, CanvasPos.Y + 50));
-                ImGui.BeginChild("Player controls", new Vector2(170, 50), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+                ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X / 2 - 85 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+                ImGui.BeginChild("Player controls", new Vector2(170, 50) * FontController.DSF, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
                 var playColor = !MidiPlayer.IsTimerRunning ? Vector4.One : Settings.R_HandColor;
 
                 ImGui.PushFont(FontController.Font16_Icon16);
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = playColor;
-                if (ImGui.Button($"{FontAwesome6.Play}", new(50, ImGui.GetWindowSize().Y)))
+                if (ImGui.Button($"{FontAwesome6.Play}", new(50 * FontController.DSF, ImGui.GetWindowSize().Y)))
                 {
                     MidiPlayer.Playback.Start();
                     MidiPlayer.StartTimer();
@@ -809,14 +817,14 @@ public class ScreenCanvas
                 var pauseColor = MidiPlayer.IsTimerRunning ? Vector4.One : new(0.70f, 0.22f, 0.22f, 1);
                 ImGui.SameLine();
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = pauseColor;
-                if (ImGui.Button($"{FontAwesome6.Pause}", new(50, ImGui.GetWindowSize().Y)))
+                if (ImGui.Button($"{FontAwesome6.Pause}", new(50 * FontController.DSF, ImGui.GetWindowSize().Y)))
                 {
                     MidiPlayer.Playback.Stop();
                     MidiPlayer.IsTimerRunning = false;
                 }
                 ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = Vector4.One;
                 ImGui.SameLine();
-                if (ImGui.Button($"{FontAwesome6.Stop}", new(50, ImGui.GetWindowSize().Y)) || ImGui.IsKeyPressed(ImGuiKey.Backspace, false))
+                if (ImGui.Button($"{FontAwesome6.Stop}", new(50 * FontController.DSF, ImGui.GetWindowSize().Y)) || ImGui.IsKeyPressed(ImGuiKey.Backspace, false))
                 {
                     MidiPlayer.Playback.Stop();
                     MidiPlayer.Playback.MoveToStart();
@@ -834,8 +842,8 @@ public class ScreenCanvas
                 if (!IsLearningMode && !IsEditMode)
                 {
                     ImGui.PushFont(FontController.Font16_Icon16);
-                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220, CanvasPos.Y + 50));
-                    if (ImGui.Button(directionIcon, new(50, 50)))
+                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+                    if (ImGui.Button(directionIcon, new Vector2(50, 50) * FontController.DSF))
                     {
                         _upDirection = !_upDirection;
                     }
@@ -843,8 +851,8 @@ public class ScreenCanvas
                 }
                 
                 ImGui.PushFont(FontController.Font16_Icon16);
-                ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 160, CanvasPos.Y + 50));
-                if (ImGui.Button(showTextIcon, new(50, 50)))
+                ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 160 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+                if (ImGui.Button(showTextIcon, new Vector2(50, 50) * FontController.DSF))
                 {
                     _showTextNotes = !_showTextNotes;
                 }
@@ -877,7 +885,7 @@ public class ScreenCanvas
                         }
                     }
 
-                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 160, CanvasPos.Y + 250));
+                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 160 * FontController.DSF, CanvasPos.Y + 250 * FontController.DSF));
                     ImGui.BeginGroup();
                     foreach (var textType in Enum.GetValues<TextTypes>())
                     {
@@ -888,8 +896,8 @@ public class ScreenCanvas
                 }               
 
                 ImGui.PushFont(FontController.Font16_Icon16);
-                ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 100, CanvasPos.Y + 50));
-                if (ImGui.Button(icon, new(50, 50)))
+                ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 100 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+                if (ImGui.Button(icon, new Vector2(50, 50) * FontController.DSF))
                 {
                     _lockTopBar = !_lockTopBar;
                 }
@@ -897,10 +905,11 @@ public class ScreenCanvas
 
                 if (!IsLearningMode)
                 {
-                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220, CanvasPos.Y + 110));
+                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220 * FontController.DSF, CanvasPos.Y + 110 * FontController.DSF));
                     if (ImGui.BeginCombo("##Fall speed", $"{FallSpeed}",
                         ImGuiComboFlags.WidthFitPreview | ImGuiComboFlags.HeightLarge))
                     {
+                        _comboFallSpeed = true;
                         foreach (var speed in Enum.GetValues(typeof(FallSpeeds)))
                         {
                             if (ImGui.Selectable(speed.ToString()))
@@ -910,11 +919,14 @@ public class ScreenCanvas
                         }
                         ImGui.EndCombo();
                     }
+                    else
+                        _comboFallSpeed = false;
 
-                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220, CanvasPos.Y + 155));
+                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220 * FontController.DSF, CanvasPos.Y + 155 * FontController.DSF));
                     if (ImGui.BeginCombo("##Playback speed", $"{MidiPlayer.Playback.Speed}x",
                         ImGuiComboFlags.WidthFitPreview | ImGuiComboFlags.HeightLarge))
                     {
+                        _comboPlaybackSpeed = true;
                         for (float i = 0.25f; i <= 4; i += 0.25f)
                         {
                             if (ImGui.Selectable($"{i}x"))
@@ -924,6 +936,8 @@ public class ScreenCanvas
                         }
                         ImGui.EndCombo();
                     }
+                    else 
+                        _comboPlaybackSpeed = false;
                 }             
             }
         }
@@ -931,8 +945,8 @@ public class ScreenCanvas
         if (showTopBar || LockTopBar)
         {
             ImGui.PushFont(FontController.Font16_Icon16);
-            ImGui.SetCursorScreenPos(new(25, CanvasPos.Y + 50));
-            if (ImGui.Button(FontAwesome6.ArrowLeftLong, new(100, 50)) || ImGui.IsKeyPressed(ImGuiKey.Escape, false))
+            ImGui.SetCursorScreenPos(new(25 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+            if (ImGui.Button(FontAwesome6.ArrowLeftLong, new Vector2(100, 50) * FontController.DSF) || ImGui.IsKeyPressed(ImGuiKey.Escape, false))
             {
                 MidiPlayer.Playback?.Stop();
                 MidiPlayer.Playback?.MoveToStart();
@@ -947,21 +961,24 @@ public class ScreenCanvas
             var neonIcon = Settings.NeonFx ? FontAwesome6.Lightbulb : FontAwesome6.PowerOff;
 
             ImGui.PushFont(FontController.Font16_Icon16);
-            ImGui.SetCursorScreenPos(new(25, CanvasPos.Y + 110));
-            if (ImGui.Button(neonIcon, new(35, 35)))
+            ImGui.SetCursorScreenPos(new(25 * FontController.DSF, CanvasPos.Y + 110 * FontController.DSF));
+            if (ImGui.Button(neonIcon, new Vector2(35, 35) * FontController.DSF))
             {
                 Settings.SetNeonFx(!Settings.NeonFx);
             }
             ImGui.PopFont();
 
-            ImGui.SetCursorScreenPos(new(70, CanvasPos.Y + 110));
+            ImGui.SetCursorScreenPos(new(70 * FontController.DSF, CanvasPos.Y + 110 * FontController.DSF));
             ImGui.ColorEdit4("Left Hand Color", ref Settings.L_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel
                 | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
 
-            ImGui.SetCursorScreenPos(new(115, CanvasPos.Y + 110));
+            _leftHandColorPicker = ImGui.IsPopupOpen("Left Hand Colorpicker");
+
+            ImGui.SetCursorScreenPos(new(115 * FontController.DSF, CanvasPos.Y + 110 * FontController.DSF));
             ImGui.ColorEdit4("Right Hand Color", ref Settings.R_HandColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel
                 | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
 
+            _rightHandColorPicker = ImGui.IsPopupOpen("Right Hand Colorpicker");
         }
 
         ImGui.PopFont();

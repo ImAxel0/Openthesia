@@ -64,33 +64,41 @@ public class ImGuiController : IDisposable
         io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
         io.Fonts.Flags |= ImFontAtlasFlags.NoBakedLines;
 
-        // load custom font
-        TryGetEmbeddedResourceBytes("Inter", out var fontData);
-        GCHandle pinnedArray = GCHandle.Alloc(fontData, GCHandleType.Pinned);
-        IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-
-        FontController.Font16_Icon12 = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, 16);
-        LoadIcons(12);
-
-        FontController.Font16_Icon16 = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, 16);
-        LoadIcons(16);
-
-        FontController.Title = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, 80);
-        FontController.BigIcon = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, 120);
-        LoadIcons(120);
-
-        for (int i = 17; i <= 25; i++)
-        {
-            FontController.FontSizes.Add(ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, i));
-            LoadIcons(i);
-        }
-
-        pinnedArray.Free();
+        LoadFonts();
 
         CreateDeviceResources(gd, outputDescription);
         SetPerFrameImGuiData(1f / 60f);
         ImGui.NewFrame();
         _frameBegun = true;
+    }
+
+    public unsafe void LoadFonts()
+    {
+        // load custom font
+        TryGetEmbeddedResourceBytes("Inter", out var fontData);
+        GCHandle pinnedArray = GCHandle.Alloc(fontData, GCHandleType.Pinned);
+        IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+
+        float dpiScaleFactor = User32.GetDpiForWindow(Program._window.Handle) / 96.0f;
+        FontController.DSF = dpiScaleFactor;
+
+        FontController.Font16_Icon12 = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, 16 * dpiScaleFactor);
+        LoadIcons(12);
+
+        FontController.Font16_Icon16 = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, 16 * dpiScaleFactor);
+        LoadIcons(16);
+
+        FontController.Title = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, 80 * dpiScaleFactor);
+        FontController.BigIcon = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, 120 * dpiScaleFactor);
+        LoadIcons(120);
+
+        for (int i = 17; i <= 25; i++)
+        {
+            FontController.FontSizes.Add(ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, i * dpiScaleFactor));
+            LoadIcons(i);
+        }
+
+        pinnedArray.Free();
     }
 
     static unsafe void LoadIcons(float fontSize)
