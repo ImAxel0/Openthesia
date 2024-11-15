@@ -6,6 +6,11 @@
 ### ...is a customizable midi visualization software with similar features to Synthesia
   
 ---
+:gift: If you really enjoy the app and want to show some appreciation :gift:
+
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L2K933D)
+
   :orange_book: [Documentation](https://openthesia.pages.dev/documentation) :orange_book:
 
 ## What can it do :question:
