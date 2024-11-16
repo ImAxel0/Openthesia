@@ -346,37 +346,78 @@ public class Settings
 
         ImGui.Dummy(new(50));
 
+        //Control key on device
         if (IDevice is not null)
         {
             ImGui.Text($"KEABOAR CONTROL {FontAwesome6.MobileButton}");
 
-            var DefColorStop = ControlButtonsDev.ControlNumberValues[0].HasValue ? MainBg : Vector4.One;
+            ImGui.PushFont(FontController.GetFontOfSize(15));
+            ImGui.Text($"Click the button below and then the same on your device.");
+            ImGui.PushFont(FontController.GetFontOfSize(22));
+
+            var DefColorStop = (ControlButtonsDev.ControlNumberValues[0] != -1) ? MainBg : Vector4.One;     // ■
             ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorStop;
             if (ImGui.Button($"{FontAwesome6.Stop}"))
             {
                 PressedButt = ButtonFunc.STOP;
             }
-            Drawings.Tooltip("Press STOP");
+            Drawings.Tooltip("STOP");
             ImGui.SameLine();
-            var DefColorPlay = ControlButtonsDev.ControlNumberValues[1].HasValue ? MainBg : Vector4.One;
+
+            var DefColorPlay = (ControlButtonsDev.ControlNumberValues[1] != -1) ? MainBg : Vector4.One;     // ►
             ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorPlay;
             if (ImGui.Button($"{FontAwesome6.Play}"))
             {
                 PressedButt = ButtonFunc.PLAY;
             }
-            Drawings.Tooltip("Press PLAY");
+            Drawings.Tooltip("PLAY");
             ImGui.SameLine();
-            var DefColorRec = ControlButtonsDev.ControlNumberValues[2].HasValue ? MainBg : Vector4.One;
+
+            var DefColorRec = (ControlButtonsDev.ControlNumberValues[2] != -1) ? MainBg : Vector4.One;      // ●
             ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorRec;
             if (ImGui.Button($"{FontAwesome6.Circle}"))
             {
                 PressedButt = ButtonFunc.RECORD;
             }
-            Drawings.Tooltip("Press RECORD");
+            Drawings.Tooltip("RECORD");
+            ImGui.SameLine();
 
-            ImGui.Dummy(new(50));
+            //ImGui.Separator();
+            ImGui.Text($"  ");
+            ImGui.SameLine();
+
+            var DefColorBack = (ControlButtonsDev.ControlNumberValues[3] != -1) ? MainBg : Vector4.One;     // ◄◄
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorBack;
+            if (ImGui.Button($"{FontAwesome6.Backward}"))
+            {
+                PressedButt = ButtonFunc.BACKWARD;
+            }
+            Drawings.Tooltip("BACKWARD");
+            ImGui.SameLine();
+
+            var DefColorFore = (ControlButtonsDev.ControlNumberValues[4] != -1) ? MainBg : Vector4.One;     // ►►
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorFore;
+            if (ImGui.Button($"{FontAwesome6.Forward}"))
+            {
+                PressedButt = ButtonFunc.FOREWARD;
+            }
+            Drawings.Tooltip("FOREWARD");
+
+            ImGui.SameLine();
+            ImGui.Text($"  ");
+            ImGui.SameLine();
+
+            var DefColorClear = ImGuiTheme.HtmlToVec4("#AF1015");                                           // forget this setti
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorClear;
+            if (ImGui.Button($"{FontAwesome6.Recycle}"))
+            {
+                PressedButt = ButtonFunc.NULL;
+                ControlButtonsDev.ClearAll();
+            }
 
             ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = Vector4.One;
+            Drawings.Tooltip("Clear previesly saved button");
+            ImGui.Dummy(new(50));
         }
 
         ImGui.Text($"LOOK AND FEEL {FontAwesome6.Paintbrush}");

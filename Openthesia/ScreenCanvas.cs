@@ -586,22 +586,28 @@ public class ScreenCanvas
         }
 
         if (ImGui.IsKeyPressed(ImGuiKey.RightArrow))
-        {
-            float n = ImGui.GetIO().KeyCtrl ? 0.1f : 1f;
-            var newTime = Math.Clamp(MidiPlayer.Seconds + n, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds);
-            long ms = (long)(newTime * 1000000);
-            MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
-            MidiPlayer.Timer = newTime * 100 * _fallSpeed;
-        }
+            MoveForeward();
 
         if (ImGui.IsKeyPressed(ImGuiKey.LeftArrow))
-        {
-            float n = ImGui.GetIO().KeyCtrl ? 0.1f : 1f;
-            var newTime = Math.Clamp(MidiPlayer.Seconds - n, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds);
-            long ms = (long)(newTime * 1000000);
-            MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
-            MidiPlayer.Timer = newTime * 100 * _fallSpeed;
-        }
+            MoveBackward();
+    }
+
+    internal static void MoveBackward()
+    {
+        float n = ImGui.GetIO().KeyCtrl ? 0.1f : 1f;
+        var newTime = Math.Clamp(MidiPlayer.Seconds - n, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds);
+        long ms = (long)(newTime * 1000000);
+        MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
+        MidiPlayer.Timer = newTime * 100 * _fallSpeed;
+    }
+
+    internal static void MoveForeward()
+    {
+        float n = ImGui.GetIO().KeyCtrl ? 0.1f : 1f;
+        var newTime = Math.Clamp(MidiPlayer.Seconds + n, 0, (float)MidiFileData.MidiFile.GetDuration<MetricTimeSpan>().TotalSeconds);
+        long ms = (long)(newTime * 1000000);
+        MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
+        MidiPlayer.Timer = newTime * 100 * _fallSpeed;
     }
 
     private static void GetInputs()

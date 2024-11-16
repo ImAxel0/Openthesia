@@ -1,134 +1,206 @@
 ﻿using Melanchall.DryWetMidi.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Openthesia
 {
     internal enum ButtonFunc
     {
+        NULL = -1,
         STOP = 0,
         PLAY = 1,
         RECORD = 2,
-        NULL,
+        BACKWARD = 3,
+        FOREWARD = 4,
     }
 
     internal static class ControlButtonsDev
     {
-        internal static int?[] ControlNumberValues = new int?[3];
+#pragma warning disable CS8618 //Its set in LoadSettings() at ProgramData.cs
+        internal static int[] ControlNumberValues;
+#pragma warning restore CS8618 
+
+        //the same order like ButtonFunc enum:                               ■ , ► , ● , ◄◄, ►►
+        //Indexes:                                                           0 , 1 , 2 , 3 , 4
+        internal static void ClearAll() => ControlNumberValues = new int[] { -1, -1, -1, -1, -1 };
 
         private static void SetControlNumberValues(int controlNumber, int value)
         {
             for(int i = 0; i != ControlNumberValues.Length; i++)
             {
-                if (!ControlNumberValues[i].HasValue)
-                    continue;
-
-                if (ControlNumberValues[i].Value == value)
-                    ControlNumberValues[i] = null;
+                if (ControlNumberValues[i] == value)
+                    ControlNumberValues[i] = -1;
             }
 
             ControlNumberValues[controlNumber] = value;
         }
 
-        internal static void SetControlButtonsDev(List<int> list)
+        //Cancel at time of btn release
+        private static CancellationTokenSource Scrolling = new();
+        private static async void SecondTicker(ButtonFunc direction, CancellationToken StopScrolling)
         {
+            //5 times for sec
+            PeriodicTimer secondTimer = new(new TimeSpan(0, 0, 0, 0, 200));
 
+            do //dont wait for 1st clock tick
+            {
+                if (direction == ButtonFunc.BACKWARD)
+                    ScreenCanvas.MoveBackward();
+                else if (direction == ButtonFunc.FOREWARD)
+                    ScreenCanvas.MoveForeward();
+                else
+                    return;
+            }
+            while (await secondTimer.WaitForNextTickAsync() && !StopScrolling.IsCancellationRequested);
         }
+
+        private const int Press = 127;
+        private const int Release = 0;
 
         internal static void OnControlChange(ControlChangeEvent ev)
         {
-            if (Router.Route == Router.Routes.MidiPlayback)
+            switch (Router.Route)
             {
-                List<int> ListOfInd = ControlNumberValues.Select((v, i) => new { i, v }).Where(t => t.v == ev.ControlNumber).Select(t => t.i).ToList();
+                case Router.Routes.MidiPlayback:
+                    MidiPlaybackContr(ev.ControlNumber, ev.ControlValue);
+                    break;
 
-                if (ListOfInd.Count == 0)
-                    return;
+                case Router.Routes.PlayMode:
+                    PlayModeContr(ev.ControlNumber, ev.ControlValue);
+                    break;
 
-                if (ev.ControlValue == 0)
-                    return;
-
-                switch ((ButtonFunc)ListOfInd[0])
-                {
-                    case ButtonFunc.STOP:
-                            ScreenCanvas.Stop();
-                        break;
-
-                    case ButtonFunc.PLAY:
-                        if (MidiPlayer.IsTimerRunning)
-                            ScreenCanvas.Pause();
-                        else
-                            ScreenCanvas.Play();
-                        break;
-
-                    default: return;
-                }
-            }
-            else if (Router.Route == Router.Routes.PlayMode)
-            {
-                List<int> ListOfInd = ControlNumberValues.Select((v, i) => new { i, v }).Where(t => t.v == ev.ControlNumber).Select(t => t.i).ToList();
-
-                if (ListOfInd.Count == 0)
-                    return;
-
-                switch ((ButtonFunc)ListOfInd[0])
-                {
-                    case ButtonFunc.STOP:
-                        if (MidiRecording.IsRecording())
-                            MidiRecording.StopRecording();
-                        else if (MidiPlayer.IsTimerRunning)
-                            ScreenCanvas.Stop();
-                        break;
-
-                    case ButtonFunc.RECORD:
-                        if (!MidiRecording.IsRecording())
-                            MidiRecording.StartRecording();
-                        break;
-
-                    default: return;
-                }
-
-                return;
-            }
-            else if (Router.Route == Router.Routes.Settings)
-            {
-                if (ev.ControlValue == 0)
-                    return;
-
-                int ButtonFuncInt;
-
-                switch (Settings.PressedButt)
-                {
-                    case ButtonFunc.NULL:
+                case Router.Routes.Settings:
+                    //React only for press(, not for release)
+                    if (ev.ControlValue == Press)
                         return;
+                    ChangeSetti(ev.ControlNumber);
+                    break;
 
-                    case ButtonFunc.STOP:
-                        ButtonFuncInt = (int)(ButtonFunc.STOP);
-                        break;
-
-                    case ButtonFunc.PLAY:
-                        ButtonFuncInt = (int)(ButtonFunc.PLAY);
-                        break;
-
-                    case ButtonFunc.RECORD:
-                        ButtonFuncInt = (int)(ButtonFunc.RECORD);
-                        break;
-
-                    default: return;
-                }
-
-                Settings.PressedButt = ButtonFunc.NULL;
-                SetControlNumberValues(ButtonFuncInt, ev.ControlNumber);
-
-                return;
+                default: return;
             }
         }
 
-        internal static void SetControlButtonsDev(int?[]? controlButtonDev)
+        private static bool JustPause = false;
+
+        private static void MidiPlaybackContr(int ControlNumber, int ControlValue)
         {
-            throw new NotImplementedException();
+            List<int> ListOfInd = ControlNumberValues.Select((v, i) => new { i, v }).Where(t => t.v == ControlNumber).Select(t => t.i).ToList();
+
+            //return if undef control number
+            if (ListOfInd.Count == 0)
+                return;
+
+            switch ((ButtonFunc)ListOfInd[0])
+            {
+                case ButtonFunc.STOP:
+                    //only on btn press
+                    if (ControlValue == Press)
+                        ScreenCanvas.Stop();
+                    break;
+
+                case ButtonFunc.PLAY:
+                    //Stop plaing on button press
+                    if (MidiPlayer.IsTimerRunning && ControlValue == Press)
+                    {
+                        ScreenCanvas.Pause();
+                        JustPause = true;
+                    }
+                    //Play on button release if it didnt stop on this press
+                    else if (!JustPause && ControlValue == Release)
+                        ScreenCanvas.Play();
+                    //Forget it was pressed
+                    else if (ControlValue == Release)
+                        JustPause = false;
+                    break;
+
+                case ButtonFunc.BACKWARD:
+                    //Button press
+                    if (ControlValue == Press)
+                    {
+                        Scrolling = new CancellationTokenSource();
+                        Task.Run(() => SecondTicker(ButtonFunc.BACKWARD, Scrolling.Token));
+                    }
+                    //button release
+                    else
+                    {
+                        Scrolling.Cancel();
+                    }
+                    break;
+
+                case ButtonFunc.FOREWARD:
+                    //Button press
+                    if (ControlValue == Press)
+                    {
+                        Scrolling = new CancellationTokenSource();
+                        Task.Run(() => SecondTicker(ButtonFunc.FOREWARD, Scrolling.Token));
+                    }
+                    //button release
+                    else
+                    {
+                        Scrolling.Cancel();
+                    }
+                    break;
+
+                default: return;
+            }
+        }
+
+        private static void PlayModeContr(int ControlNumber, int ControlValue)
+        {
+            List<int> ListOfInd = ControlNumberValues.Select((v, i) => new { i, v }).Where(t => t.v == ControlNumber).Select(t => t.i).ToList();
+
+            if (ListOfInd.Count == 0)
+                return;
+
+            switch ((ButtonFunc)ListOfInd[0])
+            {
+                case ButtonFunc.STOP:
+                    if (MidiRecording.IsRecording() && ControlValue == Press)
+                        MidiRecording.StopRecording();
+                    break;
+
+                case ButtonFunc.RECORD:
+                    if (!MidiRecording.IsRecording() && ControlValue == Release)
+                        MidiRecording.StartRecording();
+                    break;
+
+                default: return;
+            }
+
+            return;
+        }
+
+        private static void ChangeSetti(int ControlNumber)
+        {
+            int ButtonFuncInt;
+            switch (Settings.PressedButt)
+            {
+                case ButtonFunc.NULL:
+                    return;
+
+                case ButtonFunc.STOP:
+                    ButtonFuncInt = (int)(ButtonFunc.STOP);
+                    break;
+
+                case ButtonFunc.PLAY:
+                    ButtonFuncInt = (int)(ButtonFunc.PLAY);
+                    break;
+
+                case ButtonFunc.RECORD:
+                    ButtonFuncInt = (int)(ButtonFunc.RECORD);
+                    break;
+
+                case ButtonFunc.BACKWARD:
+                    ButtonFuncInt = (int)(ButtonFunc.BACKWARD);
+                    break;
+
+                case ButtonFunc.FOREWARD:
+                    ButtonFuncInt = (int)(ButtonFunc.FOREWARD);
+                    break;
+
+                default: return;
+            }
+
+            Settings.PressedButt = ButtonFunc.NULL;
+            SetControlNumberValues(ButtonFuncInt, ControlNumber);
         }
     }
 }

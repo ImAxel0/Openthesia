@@ -8,7 +8,7 @@ namespace Openthesia;
 
 public class ProgramData
 {
-    public static readonly string ProgramVersion = "1.2.3";
+    public const string ProgramVersion = "Alternative 1.3.0";
     public static IntPtr LogoImage;
     public static string SettingsPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia", "Settings.json");
     public static string HandsDataPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia\\HandsData");
@@ -32,6 +32,7 @@ public class ProgramData
         public bool UpDirection;
         public bool ShowTextNotes;
         public ScreenCanvas.TextTypes TextType;
+        public int[] ControlButtonsDevJ;
     }
 
     public static void Initialize()
@@ -93,11 +94,16 @@ public class ProgramData
                 ScreenCanvas.SetUpDirection(storedSettings.UpDirection);
                 ScreenCanvas.SetTextNotes(storedSettings.ShowTextNotes);
                 ScreenCanvas.TextType = storedSettings.TextType;
+                ControlButtonsDev.ControlNumberValues = storedSettings.ControlButtonsDevJ;
             }
             catch (Exception ex)
             {
                 User32.MessageBox(IntPtr.Zero, $"{ex.Message}", "Error loading program settings", User32.MB_FLAGS.MB_OK | User32.MB_FLAGS.MB_ICONERROR | User32.MB_FLAGS.MB_TOPMOST);
             }
+
+            //first run and taking json file from older verion of Openthesia
+            if (ControlButtonsDev.ControlNumberValues is null)
+                ControlButtonsDev.ClearAll();
         }
     }
 
@@ -130,6 +136,7 @@ public class ProgramData
             UpDirection = ScreenCanvas.UpDirection,
             ShowTextNotes = ScreenCanvas.ShowTextNotes,
             TextType = ScreenCanvas.TextType,
+            ControlButtonsDevJ = ControlButtonsDev.ControlNumberValues,
         };
 
         string json = JsonConvert.SerializeObject(data, settings);
