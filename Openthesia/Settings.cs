@@ -349,10 +349,10 @@ public class Settings
         //Control key on device
         if (IDevice is not null)
         {
-            ImGui.Text($"KEABOAR CONTROL {FontAwesome6.MobileButton}");
+            ImGui.Text($"MUSIC KEYBOARD CONTROL {FontAwesome6.MobileButton}");
 
             ImGui.PushFont(FontController.GetFontOfSize(15));
-            ImGui.Text($"Click the button below and then the same on your device.");
+            ImGui.Text($"Click the button below and then the same at your device.");
             ImGui.PushFont(FontController.GetFontOfSize(22));
 
             var DefColorStop = (ControlButtonsDev.ControlNumberValues[0] != -1) ? MainBg : Vector4.One;     // ■
@@ -382,7 +382,6 @@ public class Settings
             Drawings.Tooltip("RECORD");
             ImGui.SameLine();
 
-            //ImGui.Separator();
             ImGui.Text($"  ");
             ImGui.SameLine();
 
