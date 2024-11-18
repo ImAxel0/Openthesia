@@ -8,7 +8,7 @@ namespace Openthesia;
 
 public class ProgramData
 {
-    public static readonly string ProgramVersion = "1.2.3";
+    public static readonly string ProgramVersion = "1.3.0";
     public static IntPtr LogoImage;
     public static string SettingsPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia", "Settings.json");
     public static string HandsDataPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia\\HandsData");
@@ -32,6 +32,8 @@ public class ProgramData
         public bool UpDirection;
         public bool ShowTextNotes;
         public ScreenCanvas.TextTypes TextType;
+        public bool SoundFontEngine;
+        public int SoundFontLatency;
     }
 
     public static void Initialize()
@@ -48,6 +50,11 @@ public class ProgramData
             Settings.SetOutputDevice(0);
         }
         ImGuiTheme.PushTheme();
+
+        if (Settings.SoundFontEngine)
+        {
+            SoundFontPlayer.Initialize();
+        }   
     }
 
     public static void LoadSettings()
@@ -93,6 +100,8 @@ public class ProgramData
                 ScreenCanvas.SetUpDirection(storedSettings.UpDirection);
                 ScreenCanvas.SetTextNotes(storedSettings.ShowTextNotes);
                 ScreenCanvas.TextType = storedSettings.TextType;
+                Settings.SetSoundFontEngine(storedSettings.SoundFontEngine);
+                Settings.SetSoundFontLatency(storedSettings.SoundFontLatency < 15 ? Settings.SoundFontLatency : storedSettings.SoundFontLatency);
             }
             catch (Exception ex)
             {
@@ -130,6 +139,8 @@ public class ProgramData
             UpDirection = ScreenCanvas.UpDirection,
             ShowTextNotes = ScreenCanvas.ShowTextNotes,
             TextType = ScreenCanvas.TextType,
+            SoundFontEngine = Settings.SoundFontEngine,
+            SoundFontLatency = Settings.SoundFontLatency,
         };
 
         string json = JsonConvert.SerializeObject(data, settings);

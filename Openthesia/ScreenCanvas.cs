@@ -1,9 +1,10 @@
 ﻿using IconFonts;
 using ImGuiNET;
 using Melanchall.DryWetMidi.Common;
+using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using System.Numerics;
-using Vulkan.Xlib;
+using Veldrid;
 using Note = Melanchall.DryWetMidi.Interaction.Note;
 
 namespace Openthesia;
@@ -23,6 +24,7 @@ public class ScreenCanvas
     static bool _rightHandColorPicker;
     static bool _comboFallSpeed;
     static bool _comboPlaybackSpeed;
+    static bool _comboSoundFont;
 
     public static bool LockTopBar { get { return _lockTopBar; } }
     public static bool UpDirection { get { return _upDirection; } }
@@ -683,7 +685,7 @@ public class ScreenCanvas
         GetInputs();
 
         var showTopBar = ImGui.IsMouseHoveringRect(Vector2.Zero, new(ImGui.GetIO().DisplaySize.X, 300));
-        if (_comboFallSpeed || _comboPlaybackSpeed || _leftHandColorPicker || _rightHandColorPicker)
+        if (_comboFallSpeed || _comboPlaybackSpeed || _leftHandColorPicker || _rightHandColorPicker || _comboSoundFont)
             showTopBar = true;
 
         if (playMode)
@@ -721,6 +723,16 @@ public class ScreenCanvas
 
                 ImGui.EndChild();
 
+                var icon = LockTopBar ? FontAwesome6.Lock : FontAwesome6.LockOpen;
+
+                ImGui.PushFont(FontController.Font16_Icon16);
+                ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 280 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+                if (ImGui.Button(icon, new Vector2(50, 50) * FontController.DSF))
+                {
+                    _lockTopBar = !_lockTopBar;
+                }
+                ImGui.PopFont();
+
                 if (!MidiRecording.IsRecording())
                 {
                     ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 220 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
@@ -752,6 +764,17 @@ public class ScreenCanvas
                         }
                         ImGui.EndCombo();
                     }
+
+                    var fullScreenIcon = Program._window.WindowState == Veldrid.WindowState.BorderlessFullScreen ? FontAwesome6.Minimize : FontAwesome6.Expand;
+
+                    ImGui.PushFont(FontController.Font16_Icon16);
+                    ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 30 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+                    if (ImGui.Button(fullScreenIcon, new Vector2(25, 25) * FontController.DSF))
+                    {
+                        var windowsState = Program._window.WindowState == WindowState.BorderlessFullScreen ? WindowState.Normal : WindowState.BorderlessFullScreen;
+                        Program._window.WindowState = windowsState;
+                    }
+                    ImGui.PopFont();
                 }
             }
         }
@@ -826,6 +849,7 @@ public class ScreenCanvas
                 ImGui.SameLine();
                 if (ImGui.Button($"{FontAwesome6.Stop}", new(50 * FontController.DSF, ImGui.GetWindowSize().Y)) || ImGui.IsKeyPressed(ImGuiKey.Backspace, false))
                 {
+                    MidiPlayer.SoundFontEngine?.StopAllNote(0);
                     MidiPlayer.Playback.Stop();
                     MidiPlayer.Playback.MoveToStart();
                     MidiPlayer.IsTimerRunning = false;
@@ -900,6 +924,17 @@ public class ScreenCanvas
                 if (ImGui.Button(icon, new Vector2(50, 50) * FontController.DSF))
                 {
                     _lockTopBar = !_lockTopBar;
+                }
+                ImGui.PopFont();
+
+                var fullScreenIcon = Program._window.WindowState == Veldrid.WindowState.BorderlessFullScreen ? FontAwesome6.Minimize : FontAwesome6.Expand;
+
+                ImGui.PushFont(FontController.Font16_Icon16);
+                ImGui.SetCursorScreenPos(new(ImGui.GetIO().DisplaySize.X - 40 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+                if (ImGui.Button(fullScreenIcon, new Vector2(25, 25) * FontController.DSF))
+                {
+                    var windowsState = Program._window.WindowState == WindowState.BorderlessFullScreen ? WindowState.Normal : WindowState.BorderlessFullScreen;
+                    Program._window.WindowState = windowsState;
                 }
                 ImGui.PopFont();
 
@@ -979,6 +1014,36 @@ public class ScreenCanvas
                 | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
 
             _rightHandColorPicker = ImGui.IsPopupOpen("Right Hand Colorpicker");
+
+            if (Settings.SoundFontEngine)
+            {
+                ImGui.SetCursorScreenPos(new(140 * FontController.DSF, CanvasPos.Y + 50 * FontController.DSF));
+                if (ImGui.BeginCombo("##SoundFont", SoundFontPlayer.ActiveSoundFont, ImGuiComboFlags.HeightLargest | ImGuiComboFlags.WidthFitPreview))
+                {
+                    _comboSoundFont = true;
+                    foreach (var folderPath in Settings.SoundFontsPaths)
+                    {
+                        foreach (var soundFontPath in Directory.GetFiles(folderPath))
+                        {
+                            if (ImGui.Selectable(Path.GetFileNameWithoutExtension(soundFontPath)))
+                            {
+                                MidiPlayer.SoundFontEngine?.StopAllNote(0);
+                                SoundFontPlayer.LoadSoundFont(soundFontPath);
+                            }
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+                else
+                    _comboSoundFont = false;
+            }
+
+            ImGui.SetCursorPos(new Vector2(ImGui.GetIO().DisplaySize.X - 75 * FontController.DSF, ImGui.GetWindowSize().Y - 60 * FontController.DSF));
+            if (ImGui.ImageButton("SustainBtn", IOHandle.SustainPedalActive ? Drawings.SustainPedalOn : Drawings.SustainPedalOff,
+                new Vector2(50)))
+            {
+                Settings.ODevice.SendEvent(new ControlChangeEvent(new SevenBitNumber(64), new SevenBitNumber((byte)(IOHandle.SustainPedalActive ? 0 : 100))));
+            }
         }
 
         ImGui.PopFont();

@@ -179,6 +179,7 @@ public class PianoRenderer
                 cur_key++;
             }
         }
+
         ImGui.PopFont();
     }
 }

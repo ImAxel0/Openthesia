@@ -174,6 +174,26 @@ public class ImGuiController : IDisposable
         var img4 = new ImageSharpTexture(stream4);
         var dimg4 = img4.CreateDeviceTexture(_gd, _gd.ResourceFactory);
         Drawings.CSharpWhite = _controller.GetOrCreateImGuiBinding(_gd.ResourceFactory, dimg4);
+
+        // Sustain pedal off
+        TryGetEmbeddedResourceBytes("SustainPedalOff", out var sustainPedalOff);
+        Stream stream5 = new MemoryStream();
+        stream5.Write(sustainPedalOff);
+        stream5.Position = 0;
+
+        var img5 = new ImageSharpTexture(stream5);
+        var dimg5 = img5.CreateDeviceTexture(_gd, _gd.ResourceFactory);
+        Drawings.SustainPedalOff = _controller.GetOrCreateImGuiBinding(_gd.ResourceFactory, dimg5);
+
+        // Sustain pedal on
+        TryGetEmbeddedResourceBytes("SustainPedalOn", out var sustainPedalOn);
+        Stream stream6 = new MemoryStream();
+        stream6.Write(sustainPedalOn);
+        stream6.Position = 0;
+
+        var img6 = new ImageSharpTexture(stream6);
+        var dimg6 = img6.CreateDeviceTexture(_gd, _gd.ResourceFactory);
+        Drawings.SustainPedalOn = _controller.GetOrCreateImGuiBinding(_gd.ResourceFactory, dimg6);
     }
 
     public void WindowResized(int width, int height)

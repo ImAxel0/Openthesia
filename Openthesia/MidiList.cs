@@ -1,7 +1,5 @@
 ﻿using IconFonts;
 using ImGuiNET;
-using Melanchall.DryWetMidi.Core;
-using Melanchall.DryWetMidi.Interaction;
 using System.Numerics;
 
 namespace Openthesia;

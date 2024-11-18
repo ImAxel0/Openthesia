@@ -18,9 +18,18 @@ public class Settings
         KnownFolders.Documents.Path,
         KnownFolders.Downloads.Path,
         KnownFolders.Music.Path,
-    };
+    };  
 
     public static List<string> MidiPaths { get { return _midiPaths; } }
+
+
+    private static List<string> _soundFontsPaths = new()
+    {
+        Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "SoundFonts"),
+    };
+
+    public static List<string> SoundFontsPaths { get { return _soundFontsPaths; } }
+
 
     private static bool _keyboardInput;
     public static bool KeyboardInput { get { return _keyboardInput; } }
@@ -39,6 +48,12 @@ public class Settings
 
     private static int _noteRoundness = 7;
     public static int NoteRoundness { get { return _noteRoundness; } }
+
+    private static bool _soundFontEngine;
+    public static bool SoundFontEngine { get { return _soundFontEngine; } }
+
+    private static int _soundFontLatency = 75;
+    public static int SoundFontLatency { get { return _soundFontLatency; } }
 
     public static Themes Theme { get; private set; } = Themes.Sky;
     public enum Themes
@@ -86,6 +101,16 @@ public class Settings
     public static void SetNoteRoundness(int value)
     {
         _noteRoundness = value;
+    }
+
+    public static void SetSoundFontEngine(bool onoff)
+    {
+        _soundFontEngine = onoff;
+    }
+
+    public static void SetSoundFontLatency(int value)
+    {
+        _soundFontLatency = value;
     }
 
     public static void SetTheme(Themes theme)
@@ -283,7 +308,7 @@ public class Settings
         ImGui.BeginTable("Midi paths scan", 3, ImGuiTableFlags.PadOuterX | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
         ImGui.TableSetupColumn("Path");
         ImGui.TableSetupColumn("N° of midi", ImGuiTableColumnFlags.WidthFixed, 100);
-        ImGui.TableSetupColumn("##delete path", ImGuiTableColumnFlags.WidthFixed, 50);
+        ImGui.TableSetupColumn("##delete midi path", ImGuiTableColumnFlags.WidthFixed, 50);
         ImGui.TableHeadersRow();
 
         int index = 0;
@@ -338,6 +363,96 @@ public class Settings
             }
         }
 
+        // SOUND FONTS
+        ImGui.Text($"SOUND FONTS {FontAwesome6.Music}");
+
+        if (ImGui.Checkbox("SoundFont engine", ref _soundFontEngine))
+        {
+            // if sound font wasn't loaded at startup, load it on enable
+            if (_soundFontEngine && MidiPlayer.SoundFontEngine == null)
+            {
+                SoundFontPlayer.Initialize();
+            }
+        }
+        Drawings.Tooltip("If enabled, built in or external soundfonts will be used for audio playback");
+
+        ImGui.Dummy(new(10));
+
+        if (ImGui.SliderInt("SoundFont latency", ref _soundFontLatency, 15, 300))
+        {
+            MidiPlayer.SoundFontEngine?.ChangeLatency(_soundFontLatency);
+        }
+        Drawings.Tooltip("Lower values reduce sound lag but can introduce audio artifacts, " +
+            "values under 100 are recommended for an optimal playback (default = 75)");
+
+        ImGui.Dummy(new(10));
+
+        ImGui.BeginTable("Sound fonts paths scan", 3, ImGuiTableFlags.PadOuterX | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+        ImGui.TableSetupColumn("Path");
+        ImGui.TableSetupColumn("N° of sound fonts", ImGuiTableColumnFlags.WidthFixed, 220);
+        ImGui.TableSetupColumn("##delete sound font path", ImGuiTableColumnFlags.WidthFixed, 50);
+        ImGui.TableHeadersRow();
+
+        int index2 = 0;
+        foreach (var path in _soundFontsPaths.ToList())
+        {
+            // disable built in path
+            if (path == _soundFontsPaths[0])
+                ImGui.BeginDisabled(true);
+
+            ImGui.TableNextRow();
+            ImGui.TableSetColumnIndex(0);
+
+            ImGui.Text(path);
+
+            int nSoundFont = 0;
+            foreach (var soundFont in Directory.GetFiles(path))
+            {
+                if (Path.GetExtension(soundFont) == ".sf2")
+                {
+                    nSoundFont++;
+                }
+            }
+            ImGui.TableSetColumnIndex(1);
+            ImGui.Text(nSoundFont.ToString());
+            ImGui.TableSetColumnIndex(2);
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = new Vector4(1, 0, 0.2f, 1);
+            ImGui.PushFont(FontController.Font16_Icon12);
+            ImGui.PushID(index2.ToString());
+            if (ImGui.SmallButton(FontAwesome6.CircleXmark))
+            {
+                _soundFontsPaths.Remove(path);
+            }
+            ImGui.PopID();
+            ImGui.PopFont();
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = new Vector4(1);
+            index2++;
+
+            if (path == _soundFontsPaths[0])
+                ImGui.EndDisabled();
+        }
+
+        ImGui.EndTable();
+
+        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - 100 * FontController.DSF);
+        if (ImGui.Button($"{FontAwesome6.Folder}", new Vector2(100, 50) * FontController.DSF))
+        {
+            var dlg = new FolderPicker();
+            dlg.InputPath = "C:\\";
+            if (dlg.ShowDialog(Program._window.SdlWindowHandle) == true)
+            {
+                if (_soundFontsPaths.Contains(dlg.ResultPath))
+                {
+                    User32.MessageBox(IntPtr.Zero, "Specified folder is already present", "Error", User32.MB_FLAGS.MB_ICONERROR | User32.MB_FLAGS.MB_TOPMOST);
+                }
+                else
+                {
+                    _soundFontsPaths.Add(dlg.ResultPath);
+                }
+            }
+        }
+
+        // INPUT
         ImGui.Text($"INPUT {FontAwesome6.Keyboard}");
         ImGui.Checkbox("Keyboard input", ref _keyboardInput);
         Drawings.Tooltip("When keyboard input is enabled, mouse input and shortcuts using letters are disabled");

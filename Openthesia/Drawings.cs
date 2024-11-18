@@ -9,6 +9,8 @@ public class Drawings
     public static IntPtr C;
     public static IntPtr CSharp;
     public static IntPtr CSharpWhite;
+    public static IntPtr SustainPedalOff;
+    public static IntPtr SustainPedalOn;
 
     public static void RenderMatrixBackground()
     {

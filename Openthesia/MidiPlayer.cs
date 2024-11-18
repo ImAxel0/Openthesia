@@ -5,6 +5,7 @@ namespace Openthesia;
 
 public class MidiPlayer
 {
+    public static SoundFontPlayer SoundFontEngine;
     public static Playback Playback;
     public static MetricTimeSpan Time;
     public static float Seconds;

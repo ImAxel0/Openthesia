@@ -18,6 +18,8 @@
     <None Remove="Resources\imgui-vertex.hlsl.bytes" />
     <None Remove="Resources\Keys\wsharp.png" />
     <None Remove="Resources\logoimg.png" />
+    <None Remove="Resources\SustainPedalOff.png" />
+    <None Remove="Resources\SustainPedalOn.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,11 +35,15 @@
     <EmbeddedResource Include="Resources\imgui-vertex.hlsl.bytes" />
     <EmbeddedResource Include="Resources\Keys\wsharp.png" />
     <EmbeddedResource Include="Resources\logoimg.png" />
+    <EmbeddedResource Include="Resources\SustainPedalOff.png" />
+    <EmbeddedResource Include="Resources\SustainPedalOn.png" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.90.1.1" />
     <PackageReference Include="Melanchall.DryWetMidi" Version="7.1.0" />
+    <PackageReference Include="MeltySynth" Version="2.4.1" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Syroot.Windows.IO.KnownFolders" Version="1.3.0" />
     <PackageReference Include="Vanara.PInvoke.User32" Version="3.4.17" />

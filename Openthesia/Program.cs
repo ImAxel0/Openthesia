@@ -5,7 +5,6 @@ using Veldrid.StartupUtilities;
 using System.Numerics;
 using ImGuiNET;
 using Vanara.PInvoke;
-using Newtonsoft.Json;
 
 namespace Openthesia;
 
@@ -18,6 +17,7 @@ class Program
     private static ImGuiController _controller;
     private static Vector3 _clearColor = new(0.45f, 0.55f, 0.6f);
 
+    [STAThread]
     static void Main(string[] args)
     {
         User32.SetProcessDPIAware();
