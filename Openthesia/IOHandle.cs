@@ -68,6 +68,9 @@ public class IOHandle
             case MidiEventType.NoteOff:
                 OnKeyRelease((NoteOffEvent)e.Event);
                 break;
+            case MidiEventType.ControlChange:
+                ControlButtonsDev.OnControlChange((ControlChangeEvent)e.Event);
+                break;
         }
     }
 

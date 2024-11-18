@@ -25,7 +25,7 @@ public class Settings
     private static bool _keyboardInput;
     public static bool KeyboardInput { get { return _keyboardInput; } }
 
-    private static bool _animatedBackground = true;
+    private static bool _animatedBackground = false;
     public static bool AnimatedBackground { get { return _animatedBackground; } }
 
     private static bool _neonFx = true;
@@ -52,6 +52,8 @@ public class Settings
     //public static Vector4 NotesColor = ImGuiTheme.HtmlToVec4("#31CB15");
     public static Vector4 R_HandColor = ImGuiTheme.HtmlToVec4("#15CB44");
     public static Vector4 L_HandColor = ImGuiTheme.HtmlToVec4("#D4084A");
+
+    internal static ButtonFunc PressedButt = ButtonFunc.NULL;
 
     public static void SetMidiPaths(List<string> paths)
     {
@@ -112,7 +114,7 @@ public class Settings
         Theme = theme;
         ImGuiTheme.PushTheme();
     }
-    
+
     public static void SetInputDevice(int deviceIndex)
     {
         if (IDevice != null)
@@ -213,7 +215,7 @@ public class Settings
 
         ImGui.PushFont(FontController.Font16_Icon16);
         ImGui.SetCursorScreenPos(new(22, 50));
-        if (ImGui.Button(FontAwesome6.ArrowLeftLong, new Vector2(100, 50) * FontController.DSF))
+        if (ImGui.Button(FontAwesome6.ArrowLeftLong, new(100, 50)))
         {
             Router.SetRoute(Router.Routes.Home);
         }
@@ -225,7 +227,7 @@ public class Settings
         ImGui.Text("SETTINGS");
         ImGui.PopFont();
 
-        ImGuiTheme.Style.FramePadding = new(15 * FontController.DSF);
+        ImGuiTheme.Style.FramePadding = new(15);
         ImGuiTheme.PushButton(ImGuiTheme.HtmlToVec4("#0284C7"), ImGuiTheme.HtmlToVec4("#0284C7"), ImGuiTheme.HtmlToVec4("#0284C7"));
         ImGuiTheme.Style.WindowPadding = new(10);
 
@@ -300,7 +302,7 @@ public class Settings
                 if (Path.GetExtension(midiFile) == ".mid")
                 {
                     nMidis++;
-                }               
+                }
             }
             ImGui.TableSetColumnIndex(1);
             ImGui.Text(nMidis.ToString());
@@ -320,8 +322,8 @@ public class Settings
 
         ImGui.EndTable();
 
-        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - 100 * FontController.DSF);
-        if (ImGui.Button(FontAwesome6.FolderPlus, new Vector2(100, 50) * FontController.DSF))
+        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - 100);
+        if (ImGui.Button(FontAwesome6.FolderPlus, new(100, 50)))
         {
             var dlg = new FolderPicker();
             dlg.InputPath = "C:\\";
@@ -343,6 +345,79 @@ public class Settings
         Drawings.Tooltip("When keyboard input is enabled, mouse input and shortcuts using letters are disabled");
 
         ImGui.Dummy(new(50));
+
+        //Control key on device
+        if (IDevice is not null)
+        {
+            ImGui.Text($"MUSIC KEYBOARD CONTROL {FontAwesome6.MobileButton}");
+
+            ImGui.PushFont(FontController.GetFontOfSize(15));
+            ImGui.Text($"Click the button below and then the same at your device.");
+            ImGui.PushFont(FontController.GetFontOfSize(22));
+
+            var DefColorStop = (ControlButtonsDev.ControlNumberValues[0] != -1) ? MainBg : Vector4.One;     // ■
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorStop;
+            if (ImGui.Button($"{FontAwesome6.Stop}"))
+            {
+                PressedButt = ButtonFunc.STOP;
+            }
+            Drawings.Tooltip("STOP");
+            ImGui.SameLine();
+
+            var DefColorPlay = (ControlButtonsDev.ControlNumberValues[1] != -1) ? MainBg : Vector4.One;     // ►
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorPlay;
+            if (ImGui.Button($"{FontAwesome6.Play}"))
+            {
+                PressedButt = ButtonFunc.PLAY;
+            }
+            Drawings.Tooltip("PLAY");
+            ImGui.SameLine();
+
+            var DefColorRec = (ControlButtonsDev.ControlNumberValues[2] != -1) ? MainBg : Vector4.One;      // ●
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorRec;
+            if (ImGui.Button($"{FontAwesome6.Circle}"))
+            {
+                PressedButt = ButtonFunc.RECORD;
+            }
+            Drawings.Tooltip("RECORD");
+            ImGui.SameLine();
+
+            ImGui.Text($"  ");
+            ImGui.SameLine();
+
+            var DefColorBack = (ControlButtonsDev.ControlNumberValues[3] != -1) ? MainBg : Vector4.One;     // ◄◄
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorBack;
+            if (ImGui.Button($"{FontAwesome6.Backward}"))
+            {
+                PressedButt = ButtonFunc.BACKWARD;
+            }
+            Drawings.Tooltip("BACKWARD");
+            ImGui.SameLine();
+
+            var DefColorFore = (ControlButtonsDev.ControlNumberValues[4] != -1) ? MainBg : Vector4.One;     // ►►
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorFore;
+            if (ImGui.Button($"{FontAwesome6.Forward}"))
+            {
+                PressedButt = ButtonFunc.FOREWARD;
+            }
+            Drawings.Tooltip("FOREWARD");
+
+            ImGui.SameLine();
+            ImGui.Text($"  ");
+            ImGui.SameLine();
+
+            var DefColorClear = ImGuiTheme.HtmlToVec4("#AF1015");                                           // forget this setti
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = DefColorClear;
+            if (ImGui.Button($"{FontAwesome6.Recycle}"))
+            {
+                PressedButt = ButtonFunc.NULL;
+                ControlButtonsDev.ClearAll();
+            }
+
+            ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = Vector4.One;
+            Drawings.Tooltip("Clear previesly saved button");
+            ImGui.Dummy(new(50));
+        }
 
         ImGui.Text($"LOOK AND FEEL {FontAwesome6.Paintbrush}");
         ImGui.SliderInt("Note block roundness", ref _noteRoundness, 0, 15);
@@ -366,7 +441,7 @@ public class Settings
         ImGui.Checkbox("Animated background", ref _animatedBackground);
         ImGui.SameLine();
         ImGui.Checkbox("Fps counter", ref _fpsCounter);
-        
+
         ImGui.Dummy(new(10));
 
         ImGuiTheme.PushButton(ImGuiTheme.HtmlToVec4("#0284C7"), ImGuiTheme.HtmlToVec4("#0284C7"), ImGuiTheme.HtmlToVec4("#0284C7"));

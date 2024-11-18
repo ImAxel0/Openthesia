@@ -82,12 +82,20 @@ class Program
             _gd.SwapBuffers(_gd.MainSwapchain);
         }
 
-        ProgramData.SaveSettings();
+        //Hidden winsow in time of finishing of work it
+        _window.WindowState = WindowState.Hidden;
 
+        //Finish work
+        ProgramData.SaveSettings();
         _gd.WaitForIdle();
         _controller.Dispose();
         _cl.Dispose();
         _gd.Dispose();
+
+        //Close colourfull win
+        _window.Close();
+
+        //TODO at this room all thread should be aborted to close black window
     }
 
     static void RenderUI()
