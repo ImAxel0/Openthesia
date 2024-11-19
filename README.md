@@ -26,6 +26,7 @@ In the Play mode you can visualize midi inputs as rising note blocks and also re
 - **Learning mode**: wait for the right key input before going to the next note
 - **Play mode**: visualize midi input realtime and record it to export it as a midi file
 - **Hands separation**: differentiate between left and right hand with colors
+- **SoundFonts support**: built-in and external sounds support through .sf2 files
 
 ## What operating systems does it support? :desktop_computer:
 As of now Openthesia is only available on Windows devices, support for other platforms isn't currently planned.
@@ -43,7 +44,15 @@ Download the latest setup from the [releases](https://github.com/ImAxel0/Openthe
 
 ![openthesia_settings](https://github.com/ImAxel0/Openthesia/assets/124681710/7e8afe03-764c-4ff1-af9d-2337b03edd23)
 
+## SoundFonts credits
+- **Upright Piano KW** licensed under [Creative Commons CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)
+- **YDP Grand Piano** licensed under [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/)
+- **Salamander Grand Piano** licensed under [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/)
+- **Old Piano FB** licensed under [Creative Commons CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)
+
 ## Thanks to
 
 - [DryWetMidi](https://melanchall.github.io/drywetmidi/index.html)
+- [NAudio](https://github.com/naudio/NAudio)
+- [MeltySynth](https://github.com/sinshu/meltysynth)
 - [Dear ImGui](https://github.com/ocornut/imgui) & [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET)
