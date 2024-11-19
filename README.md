@@ -45,6 +45,8 @@ Download the latest setup from the [releases](https://github.com/ImAxel0/Openthe
 ![openthesia_settings](https://github.com/ImAxel0/Openthesia/assets/124681710/7e8afe03-764c-4ff1-af9d-2337b03edd23)
 
 ## SoundFonts credits
+
+https://freepats.zenvoid.org/
 - **Upright Piano KW** licensed under [Creative Commons CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)
 - **YDP Grand Piano** licensed under [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/)
 - **Salamander Grand Piano** licensed under [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/)
