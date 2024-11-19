@@ -18,6 +18,7 @@ public class ProgramData
         public string InputDevice;
         public string OutputDevice;
         public List<string> MidiPaths = new();
+        public List<string> SoundFontsPaths = new();
         public bool KeyboardInput;
         public bool AnimatedBackground;
         public bool NeonFx;
@@ -86,6 +87,7 @@ public class ProgramData
                 }
 
                 Settings.SetMidiPaths(storedSettings.MidiPaths);
+                Settings.SetSoundFontsPaths(storedSettings.SoundFontsPaths);
                 Settings.SetKeyboardInput(storedSettings.KeyboardInput);
                 Settings.SetAnimatedBackground(storedSettings.AnimatedBackground);
                 Settings.SetNeonFx(storedSettings.NeonFx);
@@ -125,6 +127,7 @@ public class ProgramData
             InputDevice = Settings.IDevice?.Name,
             OutputDevice = Settings.ODevice?.Name,
             MidiPaths = Settings.MidiPaths,
+            SoundFontsPaths = Settings.SoundFontsPaths,
             KeyboardInput = Settings.KeyboardInput,
             AnimatedBackground = Settings.AnimatedBackground,
             NeonFx = Settings.NeonFx,

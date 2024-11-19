@@ -1023,7 +1023,7 @@ public class ScreenCanvas
                     _comboSoundFont = true;
                     foreach (var folderPath in Settings.SoundFontsPaths)
                     {
-                        foreach (var soundFontPath in Directory.GetFiles(folderPath))
+                        foreach (var soundFontPath in Directory.GetFiles(folderPath).Where(f => Path.GetExtension(f) == ".sf2"))
                         {
                             if (ImGui.Selectable(Path.GetFileNameWithoutExtension(soundFontPath)))
                             {

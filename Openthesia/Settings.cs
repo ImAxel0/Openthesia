@@ -22,7 +22,6 @@ public class Settings
 
     public static List<string> MidiPaths { get { return _midiPaths; } }
 
-
     private static List<string> _soundFontsPaths = new()
     {
         Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "SoundFonts"),
@@ -70,7 +69,18 @@ public class Settings
 
     public static void SetMidiPaths(List<string> paths)
     {
+        if (paths.Count == 0)
+            return;
+
         _midiPaths = paths;
+    }
+
+    public static void SetSoundFontsPaths(List<string> paths)
+    {
+        if (paths.Count == 0)
+            return;
+
+        _soundFontsPaths = paths;
     }
 
     public static void SetKeyboardInput(bool onoff)
@@ -346,11 +356,11 @@ public class Settings
         ImGui.EndTable();
 
         ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - 100 * FontController.DSF);
-        if (ImGui.Button(FontAwesome6.FolderPlus, new Vector2(100, 50) * FontController.DSF))
+        if (ImGui.Button($"{FontAwesome6.FolderPlus}##addMidiPath", new Vector2(100, 50) * FontController.DSF))
         {
             var dlg = new FolderPicker();
             dlg.InputPath = "C:\\";
-            if (dlg.ShowDialog(Program._window.SdlWindowHandle) == true)
+            if (dlg.ShowDialog(Program._window.Handle) == true)
             {
                 if (_midiPaths.Contains(dlg.ResultPath))
                 {
@@ -435,11 +445,11 @@ public class Settings
         ImGui.EndTable();
 
         ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - 100 * FontController.DSF);
-        if (ImGui.Button($"{FontAwesome6.Folder}", new Vector2(100, 50) * FontController.DSF))
+        if (ImGui.Button($"{FontAwesome6.FolderPlus}##addSoundPath", new Vector2(100, 50) * FontController.DSF))
         {
             var dlg = new FolderPicker();
             dlg.InputPath = "C:\\";
-            if (dlg.ShowDialog(Program._window.SdlWindowHandle) == true)
+            if (dlg.ShowDialog(Program._window.Handle) == true)
             {
                 if (_soundFontsPaths.Contains(dlg.ResultPath))
                 {
