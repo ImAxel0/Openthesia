@@ -5,6 +5,7 @@ using System.Numerics;
 using Syroot.Windows.IO;
 using Vanara.PInvoke;
 using Openthesia.FileDialogs;
+using NAudio.Wave;
 
 namespace Openthesia;
 
@@ -60,6 +61,14 @@ public class Settings
         Sky,
         Volcano,
         Synthesia,
+    }
+
+    public static string SelectedAsioDriverName { get; private set; } = string.Empty;
+    public static AudioDriverTypes AudioDriverType { get; private set; } = AudioDriverTypes.WaveOut;
+    public enum AudioDriverTypes
+    {
+        WaveOut,
+        ASIO,
     }
 
     public static Vector4 MainBg = ImGuiTheme.HtmlToVec4("#1F2937");
@@ -386,14 +395,71 @@ public class Settings
         }
         Drawings.Tooltip("If enabled, built in or external soundfonts will be used for audio playback");
 
-        ImGui.Dummy(new(10));
-
-        if (ImGui.SliderInt("SoundFont latency", ref _soundFontLatency, 15, 300))
+        if (SoundFontEngine)
         {
-            MidiPlayer.SoundFontEngine?.ChangeLatency(_soundFontLatency);
+            ImGui.Dummy(new(10));
+
+            if (ImGui.BeginCombo("Audio driver", AudioDriverType.ToString()))
+            {
+                foreach (var driver in Enum.GetValues<AudioDriverTypes>())
+                {
+                    var flag = (driver == AudioDriverTypes.ASIO) && !AsioOut.GetDriverNames().Any() 
+                        ? ImGuiSelectableFlags.Disabled : ImGuiSelectableFlags.None;
+
+                    if (ImGui.Selectable(driver.ToString(), false, flag))
+                    {
+                        if (driver == AudioDriverTypes.ASIO)
+                        {
+                            // if switching to ASIO, select the first availible driver
+                            SelectedAsioDriverName = AsioOut.GetDriverNames()[0];
+                        }
+
+                        // change driver type then re-initialize the sound font engine
+                        AudioDriverType = driver;
+                        SoundFontPlayer.Initialize();
+                    }
+                }
+                ImGui.EndCombo();
+            }
+
+            if (AudioDriverType == AudioDriverTypes.ASIO)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.20f, 0.32f, 0.94f, 1));
+                ImGui.SameLine();
+                if (ImGui.Button("ASIO settings"))
+                {
+                    MidiPlayer.SoundFontEngine?.AsioOut.ShowControlPanel();
+                }
+                ImGui.PopStyleColor();
+
+                ImGui.Dummy(new(10));
+
+                if (ImGui.BeginCombo("ASIO driver", SelectedAsioDriverName))
+                {
+                    foreach (var driver in AsioOut.GetDriverNames())
+                    {
+                        if (ImGui.Selectable(driver))
+                        {
+                            SelectedAsioDriverName = driver;
+                            SoundFontPlayer.Initialize();
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+            }
+
+            if (AudioDriverType == AudioDriverTypes.WaveOut)
+            {
+                ImGui.Dummy(new(10));
+
+                if (ImGui.SliderInt("SoundFont latency (WaveOut driver only)", ref _soundFontLatency, 15, 300))
+                {
+                    MidiPlayer.SoundFontEngine?.ChangeLatency(_soundFontLatency);
+                }
+                Drawings.Tooltip("Lower values reduce sound lag but can introduce audio artifacts, " +
+                    "values under 100 are recommended for an optimal playback (default = 75)");
+            }
         }
-        Drawings.Tooltip("Lower values reduce sound lag but can introduce audio artifacts, " +
-            "values under 100 are recommended for an optimal playback (default = 75)");
 
         ImGui.Dummy(new(10));
 

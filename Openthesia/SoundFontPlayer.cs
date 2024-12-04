@@ -40,11 +40,6 @@ public class SoundFontPlayer
                 LoadSynthesizer(soundFont, sampleRate);
             }
         }
-
-        //_asioOut = new AsioOut(AsioOut.GetDriverNames()[1]);
-        //_asioOut.Init(provider);
-        //_asioOut.ShowControlPanel();
-        //_asioOut.Play();
     }
 
     private void LoadSynthesizer(SoundFont soundFont, int sampleRate)
@@ -55,14 +50,29 @@ public class SoundFontPlayer
 
         _midiSampleProvider = new MidiSampleProvider(_synthesizer);
 
-        _waveOut = new WaveOutEvent();
-        _waveOut.DesiredLatency = Settings.SoundFontLatency;
-        _waveOut.Init(_midiSampleProvider);
-        _waveOut.Play();
+        if (Settings.AudioDriverType == Settings.AudioDriverTypes.WaveOut)
+        {
+            _asioOut?.Stop();
+            _asioOut?.Dispose();
+
+            _waveOut = new WaveOutEvent();
+            _waveOut.DesiredLatency = Settings.SoundFontLatency;
+            _waveOut.Init(_midiSampleProvider);
+            _waveOut.Play();
+        }
+        else if (Settings.AudioDriverType == Settings.AudioDriverTypes.ASIO)
+        {
+            _waveOut?.Stop();
+            _waveOut?.Dispose();
+
+            _asioOut = new AsioOut(Settings.SelectedAsioDriverName);
+            _asioOut.Init(_midiSampleProvider);
+            _asioOut.Play();
+        }
     }
 
     public static void Initialize()
-    {
+    {     
         string defaultSoundFontPath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "SoundFonts\\SalamanderGrandPiano.sf2");
         if (File.Exists(defaultSoundFontPath))
         {
