@@ -7,6 +7,7 @@ namespace Openthesia;
 public class MidiList
 {
     private static string _searchBuffer = string.Empty;
+    private static bool _alphabeticOrder = true;
 
     public static void Render()
     {
@@ -45,28 +46,38 @@ public class MidiList
         ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X - ImGui.GetIO().DisplaySize.X / 1.2f) / 2, 120 * FontController.DSF));
         ImGui.BeginChild("Midis container", new Vector2(ImGui.GetIO().DisplaySize.X / 1.2f, ImGui.GetIO().DisplaySize.Y / 1.2f), 
             ImGuiChildFlags.AlwaysUseWindowPadding | ImGuiChildFlags.Border);
+        ImGui.Text($"{FontAwesome6.Folder} MIDI File Browser");
+        ImGui.Spacing();
 
         ImGui.BeginChild("Searchbar", new(ImGui.GetIO().DisplaySize.X / 1.2f, 50));
-        ImGui.InputTextWithHint("Search", "Search midi file...", ref _searchBuffer, 1000);
+        string orderIcon = _alphabeticOrder ? FontAwesome6.ArrowDownAZ : FontAwesome6.ArrowUpAZ;
+        if (ImGui.Button(orderIcon))
+        {
+            _alphabeticOrder = !_alphabeticOrder;
+        }
+        ImGui.SameLine();
+        ImGui.InputTextWithHint($"Search {FontAwesome6.MagnifyingGlass}", "Search midi file...", ref _searchBuffer, 1000);
         ImGui.EndChild();
 
-        ImGui.BeginChild("Midi file list", ImGui.GetContentRegionAvail());
-        var width = ImGui.GetContentRegionAvail().X;
+        ImGui.Separator();
 
-        foreach (var midiPath in Settings.MidiPaths)
+        ImGui.BeginChild("Midi file list", ImGui.GetContentRegionAvail());
+        //var width = ImGui.GetContentRegionAvail().X;
+
+        if (ImGui.BeginTable("File Table", 1, ImGuiTableFlags.PadOuterX))
         {
-            int index = 0;
-            var files = Directory.GetFiles(midiPath);
-            foreach (var file in files)
+            ImGui.TableSetupColumn("Name");
+
+            foreach (var midiPath in Settings.MidiPaths)
             {
-                if (Path.GetExtension(file) == ".mid")
+                var files = Directory.GetFiles(midiPath, "*.mid");
+                foreach (var file in _alphabeticOrder ? files : files.Reverse())
                 {
                     if (!Path.GetFileName(file).ToLower().Contains(_searchBuffer.ToLower()) && _searchBuffer != string.Empty)
                         continue;
 
-                    ImGui.Columns(2, file, true);
-                    ImGui.SetColumnWidth(0, width - 150);
-
+                    ImGui.TableNextRow();
+                    ImGui.TableSetColumnIndex(0);
                     if (ImGui.Selectable(Path.GetFileName(file)))
                     {
                         MidiFileHandler.LoadMidiFile(file);
@@ -76,14 +87,9 @@ public class MidiList
                         MidiPlayer.Playback.Stop();
                         Router.SetRoute(Router.Routes.MidiFileView);
                     }
-
-                    ImGui.NextColumn();
-                    ImGui.Text(FontAwesome6.Star);
-                    ImGui.Columns(1);
-                    ImGui.Dummy(new(5));
                 }
-                index++;
             }
+            ImGui.EndTable();
         }
 
         ImGui.PopFont();

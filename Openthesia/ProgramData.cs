@@ -35,6 +35,8 @@ public class ProgramData
         public ScreenCanvas.TextTypes TextType;
         public bool SoundFontEngine;
         public int SoundFontLatency;
+        public Settings.AudioDriverTypes AudioDriverType;
+        public string SelectedAsioDriverName;
     }
 
     public static void Initialize()
@@ -104,6 +106,8 @@ public class ProgramData
                 ScreenCanvas.TextType = storedSettings.TextType;
                 Settings.SetSoundFontEngine(storedSettings.SoundFontEngine);
                 Settings.SetSoundFontLatency(storedSettings.SoundFontLatency < 15 ? Settings.SoundFontLatency : storedSettings.SoundFontLatency);
+                Settings.SetAudioDriverType(storedSettings.AudioDriverType);
+                Settings.SetAsioDriverDevice(storedSettings.SelectedAsioDriverName);
             }
             catch (Exception ex)
             {
@@ -144,6 +148,8 @@ public class ProgramData
             TextType = ScreenCanvas.TextType,
             SoundFontEngine = Settings.SoundFontEngine,
             SoundFontLatency = Settings.SoundFontLatency,
+            AudioDriverType = Settings.AudioDriverType,
+            SelectedAsioDriverName = Settings.SelectedAsioDriverName,
         };
 
         string json = JsonConvert.SerializeObject(data, settings);

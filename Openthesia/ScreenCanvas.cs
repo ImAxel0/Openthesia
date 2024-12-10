@@ -262,6 +262,10 @@ public class ScreenCanvas
             var length = (float)note.LengthAs<MetricTimeSpan>(MidiFileData.TempoMap).TotalSeconds * _fallSpeed;
             var col = LeftRightData.S_IsRightNote[index] ? Settings.R_HandColor : Settings.L_HandColor;
 
+            // color opacity based on note velocity
+            col.W = note.Velocity * 1.27f / 161.29f;
+            col.W = Math.Clamp(col.W, 0.3f, 1f); // we clamp it so they don't disappear with lower velocities
+
             float py1;
             float py2;
             if (UpDirection && !IsLearningMode && !IsEditMode)

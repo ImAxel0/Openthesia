@@ -5,6 +5,7 @@ using Veldrid.StartupUtilities;
 using System.Numerics;
 using ImGuiNET;
 using Vanara.PInvoke;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Openthesia;
 

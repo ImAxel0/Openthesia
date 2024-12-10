@@ -132,6 +132,27 @@ public class Settings
         _soundFontLatency = value;
     }
 
+    public static void SetAudioDriverType(AudioDriverTypes driverType)
+    {
+        AudioDriverType = driverType;
+    }
+
+    public static void SetAsioDriverDevice(string deviceName)
+    {
+        var drivers = AsioOut.GetDriverNames();
+        if (drivers.Length > 0)
+        {
+            // on startup: if last device is still present select it
+            if (drivers.Contains(deviceName))
+            {
+                SelectedAsioDriverName = deviceName;
+            }
+            // else select the first available
+            else
+                SelectedAsioDriverName = drivers[0];
+        }
+    }
+
     public static void SetTheme(Themes theme)
     {
         switch (theme)
@@ -421,6 +442,9 @@ public class Settings
                 }
                 ImGui.EndCombo();
             }
+            Drawings.Tooltip("Driver used by SoundFonts for sound playback\n" +
+                "- WaveOut: higher latency but good enough for listening only\n" +
+                "- ASIO: lower latency, ideal if playing a midi instrument");
 
             if (AudioDriverType == AudioDriverTypes.ASIO)
             {
