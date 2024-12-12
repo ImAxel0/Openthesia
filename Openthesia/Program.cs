@@ -53,6 +53,8 @@ class Program
         ImGuiController.LoadImages(_gd, _controller);
         ProgramData.Initialize();
 
+        Application app = new();
+
         while (_window.Exists)
         {
             deltaTime = stopwatch.ElapsedTicks / (float)Stopwatch.Frequency;
@@ -66,12 +68,11 @@ class Program
                 var windowsState = _window.WindowState == WindowState.BorderlessFullScreen ? WindowState.Normal : WindowState.BorderlessFullScreen;
                 _window.WindowState = windowsState;
             }
-            
-            RenderUI();
 
-            ImGuiController.UpdateMouseCursor();
+            app.OnUpdate();
+            //RenderUI();          
 
-            if (!IsRunning)
+            if (!app.IsRunning())
                 break;
 
             _cl.Begin();
@@ -90,7 +91,7 @@ class Program
         _cl.Dispose();
         _gd.Dispose();
     }
-
+    /*
     static void RenderUI()
     {
         ImGui.SetNextWindowPos(Vector2.Zero, ImGuiCond.Once);
@@ -137,4 +138,5 @@ class Program
         }
         ImGui.End();
     }
+    */
 }
