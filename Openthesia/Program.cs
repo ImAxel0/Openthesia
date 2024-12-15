@@ -5,7 +5,7 @@ using Veldrid.StartupUtilities;
 using System.Numerics;
 using ImGuiNET;
 using Vanara.PInvoke;
-using Microsoft.DotNet.PlatformAbstractions;
+using Openthesia.Core;
 
 namespace Openthesia;
 
@@ -70,8 +70,6 @@ class Program
             }
 
             app.OnUpdate();
-            //RenderUI();          
-
             if (!app.IsRunning())
                 break;
 
@@ -91,52 +89,4 @@ class Program
         _cl.Dispose();
         _gd.Dispose();
     }
-    /*
-    static void RenderUI()
-    {
-        ImGui.SetNextWindowPos(Vector2.Zero, ImGuiCond.Once);
-        ImGui.SetNextWindowSize(ImGui.GetIO().DisplaySize);
-        ImGui.Begin("Main", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar
-            | ImGuiWindowFlags.NoScrollWithMouse);
-
-        switch (Router.Route)
-        {
-            case Router.Routes.Home:
-                Home.Render();
-                break;
-            case Router.Routes.MidiList:
-                MidiList.Render();
-                break;
-            case Router.Routes.MidiFileView:
-                MidiFileView.Render();
-                break;
-            case Router.Routes.MidiPlayback:
-                ImGui.BeginChild("Screen", new(ImGui.GetContentRegionAvail().X, ImGui.GetIO().DisplaySize.Y - (ImGui.GetIO().DisplaySize.Y * 25f / 100)));
-                ScreenCanvas.RenderScreen();
-                ImGui.EndChild();
-
-                ImGui.GetForegroundDrawList().AddLine(new(0, ImGui.GetCursorPos().Y), new(ImGui.GetIO().DisplaySize.X, ImGui.GetCursorPos().Y), ImGui.GetColorU32(Settings.R_HandColor), 2);
-
-                ImGui.BeginChild("Keyboard", ImGui.GetContentRegionAvail());
-                PianoRenderer.RenderKeyboard();
-                ImGui.EndChild();
-                break;
-            case Router.Routes.PlayMode:
-                ImGui.BeginChild("Screen", new(ImGui.GetContentRegionAvail().X, ImGui.GetIO().DisplaySize.Y - (ImGui.GetIO().DisplaySize.Y * 25f / 100)));
-                ScreenCanvas.RenderScreen(true);
-                ImGui.EndChild();
-
-                ImGui.GetForegroundDrawList().AddLine(new(0, ImGui.GetCursorPos().Y), new(ImGui.GetIO().DisplaySize.X, ImGui.GetCursorPos().Y), ImGui.GetColorU32(Settings.R_HandColor), 2);
-
-                ImGui.BeginChild("Keyboard", ImGui.GetContentRegionAvail());
-                PianoRenderer.RenderKeyboard();
-                ImGui.EndChild();
-                break;
-            case Router.Routes.Settings:
-                Settings.Render();
-                break;
-        }
-        ImGui.End();
-    }
-    */
 }
