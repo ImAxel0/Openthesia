@@ -13,6 +13,7 @@ public class SettingsData
     public bool AnimatedBackground;
     public bool NeonFx;
     public bool KeyPressColorMatch;
+    public bool UseVelocityAsNoteOpacity;
     public bool FpsCounter;
     public int NoteRoundness;
     public Themes Theme;

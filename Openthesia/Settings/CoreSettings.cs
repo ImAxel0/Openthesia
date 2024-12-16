@@ -14,6 +14,9 @@ public static class CoreSettings
     private static bool _keypressColorMatch;
     public static ref bool KeyPressColorMatch => ref _keypressColorMatch;
 
+    private static bool _useVelocityAsNoteOpacity;
+    public static ref bool UseVelocityAsNoteOpacity => ref _useVelocityAsNoteOpacity;
+
     private static bool _fpsCounter;
     public static ref bool FpsCounter => ref _fpsCounter;
 
@@ -44,6 +47,11 @@ public static class CoreSettings
     public static void SetKeyPressColorMatch(bool onoff)
     {
         _keypressColorMatch = onoff;
+    }
+
+    public static void SetUseVelocityAsNoteOpacity(bool onoff)
+    {
+        _useVelocityAsNoteOpacity = onoff;
     }
 
     public static void SetFpsCounter(bool onoff)

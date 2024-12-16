@@ -19,11 +19,16 @@ public class ModeSelectionWindow : ImGuiWindow
     public static void RenderContainer()
     {
         ImGui.PushStyleColor(ImGuiCol.ChildBg, ThemeManager.MainBgCol * 0.8f);
-        ImGui.SetNextWindowPos(new((ImGui.GetIO().DisplaySize.X - ImGui.GetIO().DisplaySize.X / 1.2f) / 2, 120 * FontController.DSF));
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 2f);
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 10f);
+        ImGui.SetNextWindowPos(new((ImGui.GetIO().DisplaySize.X - ImGui.GetIO().DisplaySize.X / 1.2f) / 2, ImGuiUtils.FixedSize(new Vector2(120)).Y));
         if (ImGui.BeginChild("Container", new(ImGui.GetIO().DisplaySize.X / 1.2f, ImGui.GetIO().DisplaySize.Y / 1.2f),
             ImGuiChildFlags.AlwaysUseWindowPadding | ImGuiChildFlags.Border))
         {
-            Drawings.RenderMatrixBackground();
+            ImGui.PopStyleVar(2);
+
+            if (CoreSettings.AnimatedBackground)
+                Drawings.RenderMatrixBackground();
 
             RenderTitle(MidiFileData.FileName.Replace(".mid", string.Empty), 50 * FontController.DSF);
 
@@ -43,8 +48,8 @@ public class ModeSelectionWindow : ImGuiWindow
     private static void RenderBackButton()
     {
         ImGui.PushFont(FontController.Font16_Icon16);
-        ImGui.SetCursorScreenPos(new Vector2(22, 50) * FontController.DSF);
-        if (ImGui.Button(FontAwesome6.ArrowLeftLong, new Vector2(100, 50) * FontController.DSF))
+        ImGui.SetCursorScreenPos(ImGuiUtils.FixedSize(new Vector2(22, 50)));
+        if (ImGui.Button(FontAwesome6.ArrowLeftLong, ImGuiUtils.FixedSize(new Vector2(100, 50))))
         {
             WindowsManager.SetWindow(Enums.Windows.MidiBrowser);
         }
@@ -62,18 +67,18 @@ public class ModeSelectionWindow : ImGuiWindow
     private static void RenderIconWithText(string icon, string text, float xFactor, float yFactor)
     {
         var io = ImGui.GetIO();
-        float xPos = io.DisplaySize.X * xFactor + 125 * FontController.DSF - ImGui.CalcTextSize(icon).X / 2;
+        ImGui.PushFont(FontController.BigIcon);
+        float xPos = io.DisplaySize.X * xFactor + ImGuiUtils.FixedSize(new Vector2(125)).X - ImGui.CalcTextSize(icon).X / 2;
         float yPos = io.DisplaySize.Y / yFactor;
+   
+        ImGui.SetCursorPos(new Vector2(xPos, yPos));
+        ImGui.Text(icon);
+        ImGui.PopFont();
 
         ImGui.PushFont(FontController.GetFontOfSize(22));
         var drawList = ImGui.GetWindowDrawList();
-        drawList.AddText(new Vector2(io.DisplaySize.X * xFactor + 125 * FontController.DSF, yPos),
+        drawList.AddText(new Vector2(io.DisplaySize.X * xFactor + ImGuiUtils.FixedSize(new Vector2(125)).X, yPos),
             ImGui.GetColorU32(Vector4.One), text);
-        ImGui.PopFont();
-
-        ImGui.PushFont(FontController.BigIcon);
-        ImGui.SetCursorPos(new Vector2(xPos, yPos));
-        ImGui.Text(icon);
         ImGui.PopFont();
     }
 
@@ -88,7 +93,7 @@ public class ModeSelectionWindow : ImGuiWindow
 
         ImGui.PushFont(FontController.GetFontOfSize(22));
         ImGui.SetCursorPos(new Vector2(io.DisplaySize.X * xFactor, io.DisplaySize.Y / yFactor));
-        if (ImGui.Button(label, new Vector2(250, 100) * FontController.DSF))
+        if (ImGui.Button(label, ImGuiUtils.FixedSize(new Vector2(250, 100))))
         {
             onClick.Invoke();
         }

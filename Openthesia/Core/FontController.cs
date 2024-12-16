@@ -14,11 +14,6 @@ public static class FontController
     public static ImFontPtr Font16_Icon16;
     public static List<ImFontPtr> FontSizes = new();
 
-    public static void PushFont(ImFontPtr font)
-    {
-
-    }
-
     public static ImFontPtr GetFontOfSize(int size)
     {
         int cSize = Math.Clamp(size, 17, 25);

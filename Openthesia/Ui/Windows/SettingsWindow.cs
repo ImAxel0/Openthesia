@@ -39,7 +39,7 @@ public class SettingsWindow : ImGuiWindow
 
         ImGui.PushFont(FontController.Font16_Icon16);
         ImGui.SetCursorScreenPos(new(22, 50));
-        if (ImGui.Button(FontAwesome6.ArrowLeftLong, new Vector2(100, 50) * FontController.DSF))
+        if (ImGui.Button(FontAwesome6.ArrowLeftLong, ImGuiUtils.FixedSize(new Vector2(100, 50))))
         {
             WindowsManager.SetWindow(Enums.Windows.Home);
         }
@@ -51,7 +51,7 @@ public class SettingsWindow : ImGuiWindow
         ImGui.Text("SETTINGS");
         ImGui.PopFont();
 
-        ImGuiTheme.Style.FramePadding = new(15 * FontController.DSF);
+        ImGuiTheme.Style.FramePadding = ImGuiUtils.FixedSize(new Vector2(15));
         ImGuiTheme.PushButton(ImGuiTheme.HtmlToVec4("#0284C7"), ImGuiTheme.HtmlToVec4("#0284C7"), ImGuiTheme.HtmlToVec4("#0284C7"));
         ImGuiTheme.Style.WindowPadding = new(10);
 
@@ -146,8 +146,8 @@ public class SettingsWindow : ImGuiWindow
 
         ImGui.EndTable();
 
-        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - 100 * FontController.DSF);
-        if (ImGui.Button($"{FontAwesome6.FolderPlus}##addMidiPath", new Vector2(100, 50) * FontController.DSF))
+        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - ImGuiUtils.FixedSize(new Vector2(100)).X);
+        if (ImGui.Button($"{FontAwesome6.FolderPlus}##addMidiPath", ImGuiUtils.FixedSize(new Vector2(100, 50))))
         {
             var dlg = new FolderPicker();
             dlg.InputPath = "C:\\";
@@ -294,8 +294,8 @@ public class SettingsWindow : ImGuiWindow
 
         ImGui.EndTable();
 
-        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - 100 * FontController.DSF);
-        if (ImGui.Button($"{FontAwesome6.FolderPlus}##addSoundPath", new Vector2(100, 50) * FontController.DSF))
+        ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - ImGuiUtils.FixedSize(new Vector2(100)).X);
+        if (ImGui.Button($"{FontAwesome6.FolderPlus}##addSoundPath", ImGuiUtils.FixedSize(new Vector2(100, 50))))
         {
             var dlg = new FolderPicker();
             dlg.InputPath = "C:\\";
@@ -337,6 +337,9 @@ public class SettingsWindow : ImGuiWindow
 
         ImGui.Checkbox("Colored keypresses", ref KeyPressColorMatch);
         Drawings.Tooltip("Pressed keys color matches notes color");
+        ImGui.SameLine();
+        ImGui.Checkbox("Velocity as note opacity", ref UseVelocityAsNoteOpacity);
+        Drawings.Tooltip("If enabled, note blocks opacity will correspond to their velocity (Midi playback only)");
         ImGui.SameLine();
         ImGui.Checkbox("Animated background", ref AnimatedBackground);
         ImGui.SameLine();

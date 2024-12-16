@@ -53,8 +53,10 @@ public abstract class ImGuiWindow
     /// </summary>
     public void RenderWindow()
     {
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0f);
         if (ImGui.Begin(_id, ref _active, _windowFlags))
         {
+            ImGui.PopStyleVar();
             if (_isMainWindow)
             {
                 ImGui.SetWindowPos(Vector2.Zero);

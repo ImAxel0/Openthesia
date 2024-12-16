@@ -18,7 +18,7 @@ public class MidiPlaybackWindow : ImGuiWindow
         Vector2 canvasSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y * 75 / 100);
         if (ImGui.BeginChild("Screen", canvasSize))
         {
-            ScreenCanvas.RenderScreen();
+            ScreenCanvas.RenderCanvas();
             ImGui.EndChild();
         }
 

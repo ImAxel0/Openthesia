@@ -38,15 +38,18 @@ public class MidiBrowserWindow : ImGuiWindow
     {
         // browser theme
         ImGui.PushStyleColor(ImGuiCol.ChildBg, ThemeManager.MainBgCol * 0.8f);
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5f);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImGuiUtils.FixedSize(new Vector2(10)));
 
         using (AutoFont font22 = new(FontController.GetFontOfSize(22)))
         {
+            ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 2f);
+            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 10f);
             ImGui.SetNextWindowPos(new Vector2((_io.DisplaySize.X - _io.DisplaySize.X / 1.2f) / 2, ImGuiUtils.FixedSize(new Vector2(120)).Y));
             Vector2 containerSize = _io.DisplaySize / 1.2f;
             if (ImGui.BeginChild("Midi browser container", containerSize, ImGuiChildFlags.AlwaysUseWindowPadding | ImGuiChildFlags.Border))
             {
+                ImGui.PopStyleVar(2);
+
                 ImGui.Text($"{FontAwesome6.Folder} MIDI File Browser");
                 ImGui.Spacing();
                 RenderSearchBar();
@@ -87,7 +90,7 @@ public class MidiBrowserWindow : ImGuiWindow
             }
 
             ImGui.PopStyleColor(); // child bg
-            ImGui.PopStyleVar(2); // child rounding, window padding
+            ImGui.PopStyleVar(); // window padding
         }
     }
 

@@ -70,6 +70,7 @@ public static class ProgramData
                 CoreSettings.SetAnimatedBackground(storedSettings.AnimatedBackground);
                 CoreSettings.SetNeonFx(storedSettings.NeonFx);
                 CoreSettings.SetKeyPressColorMatch(storedSettings.KeyPressColorMatch);
+                CoreSettings.SetUseVelocityAsNoteOpacity(storedSettings.UseVelocityAsNoteOpacity);
                 CoreSettings.SetFpsCounter(storedSettings.FpsCounter);
                 CoreSettings.SetNoteRoundness(storedSettings.NoteRoundness);
                 ThemeManager.SetTheme(storedSettings.Theme);
@@ -112,6 +113,7 @@ public static class ProgramData
             AnimatedBackground = CoreSettings.AnimatedBackground,
             NeonFx = CoreSettings.NeonFx,
             KeyPressColorMatch = CoreSettings.KeyPressColorMatch,
+            UseVelocityAsNoteOpacity = CoreSettings.UseVelocityAsNoteOpacity,
             NoteRoundness = CoreSettings.NoteRoundness,
             FpsCounter = CoreSettings.FpsCounter,
             Theme = ThemeManager.Theme,
