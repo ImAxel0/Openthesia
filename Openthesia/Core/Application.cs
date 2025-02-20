@@ -1,4 +1,5 @@
-﻿using Openthesia.Ui.Windows;
+﻿using Openthesia.Core.Midi;
+using Openthesia.Ui.Windows;
 
 namespace Openthesia.Core;
 
@@ -57,6 +58,7 @@ public class Application
 
     public void Quit()
     {
+        MidiPlayer.SoundFontEngine?.Dispose();
         _isRunning = false;
     }
 }

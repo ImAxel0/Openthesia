@@ -71,7 +71,9 @@ class Program
 
             app.OnUpdate();
             if (!app.IsRunning())
+            {
                 break;
+            }
 
             _cl.Begin();
             _cl.SetFramebuffer(_gd.MainSwapchain.Framebuffer);
@@ -88,5 +90,6 @@ class Program
         _controller.Dispose();
         _cl.Dispose();
         _gd.Dispose();
+        Process.GetCurrentProcess().Kill(); // temporary solution since process doesn't close when using ASIO4ALL
     }
 }

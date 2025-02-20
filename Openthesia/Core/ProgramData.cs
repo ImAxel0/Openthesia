@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using Openthesia.Core.SoundFonts;
 using Openthesia.Settings;
-using Openthesia.Ui;
 using Syroot.Windows.IO;
 using Vanara.PInvoke;
 

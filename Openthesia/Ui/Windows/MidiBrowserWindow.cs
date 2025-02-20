@@ -61,27 +61,31 @@ public class MidiBrowserWindow : ImGuiWindow
                     {
                         ImGui.TableSetupColumn("Name");
 
+                        List<string> midiFiles = new();
                         foreach (var midiPath in MidiPathsManager.MidiPaths)
                         {
                             var files = Directory.GetFiles(midiPath, "*.mid");
-                            foreach (var file in _alphabeticOrder ? files : files.Reverse())
-                            {
-                                if (!Path.GetFileName(file).ToLower().Contains(_searchBuffer.ToLower()) && _searchBuffer != string.Empty)
-                                    continue;
+                            midiFiles.AddRange(files);
+                        }
+                        var sortedFiles = SortFiles(midiFiles);
+                        foreach (var file in sortedFiles)
+                        {
+                            if (!Path.GetFileName(file).ToLower().Contains(_searchBuffer.ToLower()) && _searchBuffer != string.Empty)
+                                continue;
 
-                                ImGui.TableNextRow();
-                                ImGui.TableSetColumnIndex(0);
-                                if (ImGui.Selectable(Path.GetFileName(file)))
-                                {
-                                    MidiFileHandler.LoadMidiFile(file);
-                                    // we start and stop the playback so we can change the time before playing the song,
-                                    // else falling notes and keypresses are mismatched
-                                    MidiPlayer.Playback.Start();
-                                    MidiPlayer.Playback.Stop();
-                                    WindowsManager.SetWindow(Enums.Windows.ModeSelection);
-                                }
+                            ImGui.TableNextRow();
+                            ImGui.TableSetColumnIndex(0);
+                            if (ImGui.Selectable(Path.GetFileName(file)))
+                            {
+                                MidiFileHandler.LoadMidiFile(file);
+                                // we start and stop the playback so we can change the time before playing the song,
+                                // else falling notes and keypresses are mismatched
+                                MidiPlayer.Playback.Start();
+                                MidiPlayer.Playback.Stop();
+                                WindowsManager.SetWindow(Enums.Windows.ModeSelection);
                             }
                         }
+
                         ImGui.EndTable();
                     }
                     ImGui.EndChild();
@@ -92,6 +96,11 @@ public class MidiBrowserWindow : ImGuiWindow
             ImGui.PopStyleColor(); // child bg
             ImGui.PopStyleVar(); // window padding
         }
+    }
+
+    private List<string> SortFiles(List<string> midiFiles)
+    {
+        return _alphabeticOrder ? midiFiles.OrderBy(path => Path.GetFileName(path)).ToList() : midiFiles.OrderByDescending(path => Path.GetFileName(path)).ToList();
     }
 
     protected override void OnImGui()

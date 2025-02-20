@@ -198,6 +198,9 @@ public class SettingsWindow : ImGuiWindow
                         // change driver type then re-initialize the sound font engine
                         SetAudioDriverType(driver);
                         SoundFontPlayer.Initialize();
+
+                        User32.MessageBox(IntPtr.Zero, "A restart of the application may be required", "Info", 
+                            User32.MB_FLAGS.MB_TOPMOST | User32.MB_FLAGS.MB_ICONINFORMATION);
                     }
                 }
                 ImGui.EndCombo();
@@ -226,6 +229,9 @@ public class SettingsWindow : ImGuiWindow
                         {
                             SetAsioDriverDevice(driver);
                             SoundFontPlayer.Initialize();
+
+                            User32.MessageBox(IntPtr.Zero, "A restart of the application may be required", "Info",
+                                User32.MB_FLAGS.MB_TOPMOST | User32.MB_FLAGS.MB_ICONINFORMATION);
                         }
                     }
                     ImGui.EndCombo();

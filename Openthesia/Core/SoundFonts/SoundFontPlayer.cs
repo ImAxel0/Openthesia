@@ -138,4 +138,10 @@ public class SoundFontPlayer
 
         _synthesizer.NoteOffAll(channel, false);
     }
+
+    public void Dispose()
+    {
+        MidiPlayer.SoundFontEngine?.WaveOut?.Dispose();
+        MidiPlayer.SoundFontEngine?.AsioOut?.Dispose();
+    }
 }
