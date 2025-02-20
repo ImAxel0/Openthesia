@@ -10,16 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\ckey.png" />
-    <None Remove="Resources\csharp.png" />
-    <None Remove="Resources\Font\Inter.ttf" />
-    <None Remove="Resources\Font\Roboto-Regular.ttf" />
-    <None Remove="Resources\imgui-frag.hlsl.bytes" />
-    <None Remove="Resources\imgui-vertex.hlsl.bytes" />
-    <None Remove="Resources\Keys\wsharp.png" />
-    <None Remove="Resources\logoimg.png" />
-    <None Remove="Resources\SustainPedalOff.png" />
-    <None Remove="Resources\SustainPedalOn.png" />
+    <None Remove="Core\Resources\ckey.png" />
+    <None Remove="Core\Resources\csharp.png" />
+    <None Remove="Core\Resources\Font\Inter.ttf" />
+    <None Remove="Core\Resources\Font\Roboto-Regular.ttf" />
+    <None Remove="Core\Resources\imgui-frag.hlsl.bytes" />
+    <None Remove="Core\Resources\imgui-vertex.hlsl.bytes" />
+    <None Remove="Core\Resources\Keys\wsharp.png" />
+    <None Remove="Core\Resources\logoimg.png" />
+    <None Remove="Core\Resources\SustainPedalOff.png" />
+    <None Remove="Core\Resources\SustainPedalOn.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,16 +27,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Keys\white.png" />
-    <EmbeddedResource Include="Resources\Keys\black.png" />
-    <EmbeddedResource Include="Resources\Font\Inter.ttf" />
-    <EmbeddedResource Include="Resources\Font\Roboto-Regular.ttf" />
-    <EmbeddedResource Include="Resources\imgui-frag.hlsl.bytes" />
-    <EmbeddedResource Include="Resources\imgui-vertex.hlsl.bytes" />
-    <EmbeddedResource Include="Resources\Keys\wsharp.png" />
-    <EmbeddedResource Include="Resources\logoimg.png" />
-    <EmbeddedResource Include="Resources\SustainPedalOff.png" />
-    <EmbeddedResource Include="Resources\SustainPedalOn.png" />
+    <EmbeddedResource Include="Core\Resources\Keys\white.png" />
+    <EmbeddedResource Include="Core\Resources\Keys\black.png" />
+    <EmbeddedResource Include="Core\Resources\Font\Inter.ttf" />
+    <EmbeddedResource Include="Core\Resources\Font\Roboto-Regular.ttf" />
+    <EmbeddedResource Include="Core\Resources\imgui-frag.hlsl.bytes" />
+    <EmbeddedResource Include="Core\Resources\imgui-vertex.hlsl.bytes" />
+    <EmbeddedResource Include="Core\Resources\Keys\wsharp.png" />
+    <EmbeddedResource Include="Core\Resources\logoimg.png" />
+    <EmbeddedResource Include="Core\Resources\SustainPedalOff.png" />
+    <EmbeddedResource Include="Core\Resources\SustainPedalOn.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\cimgui.dll">
+    <None Update="Core\Resources\cimgui.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

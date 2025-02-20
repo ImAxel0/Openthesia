@@ -5,6 +5,7 @@ using Veldrid.StartupUtilities;
 using System.Numerics;
 using ImGuiNET;
 using Vanara.PInvoke;
+using Openthesia.Core;
 
 namespace Openthesia;
 
@@ -52,6 +53,8 @@ class Program
         ImGuiController.LoadImages(_gd, _controller);
         ProgramData.Initialize();
 
+        Application app = new();
+
         while (_window.Exists)
         {
             deltaTime = stopwatch.ElapsedTicks / (float)Stopwatch.Frequency;
@@ -65,13 +68,12 @@ class Program
                 var windowsState = _window.WindowState == WindowState.BorderlessFullScreen ? WindowState.Normal : WindowState.BorderlessFullScreen;
                 _window.WindowState = windowsState;
             }
-            
-            RenderUI();
 
-            ImGuiController.UpdateMouseCursor();
-
-            if (!IsRunning)
+            app.OnUpdate();
+            if (!app.IsRunning())
+            {
                 break;
+            }
 
             _cl.Begin();
             _cl.SetFramebuffer(_gd.MainSwapchain.Framebuffer);
@@ -88,52 +90,6 @@ class Program
         _controller.Dispose();
         _cl.Dispose();
         _gd.Dispose();
-    }
-
-    static void RenderUI()
-    {
-        ImGui.SetNextWindowPos(Vector2.Zero, ImGuiCond.Once);
-        ImGui.SetNextWindowSize(ImGui.GetIO().DisplaySize);
-        ImGui.Begin("Main", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar
-            | ImGuiWindowFlags.NoScrollWithMouse);
-
-        switch (Router.Route)
-        {
-            case Router.Routes.Home:
-                Home.Render();
-                break;
-            case Router.Routes.MidiList:
-                MidiList.Render();
-                break;
-            case Router.Routes.MidiFileView:
-                MidiFileView.Render();
-                break;
-            case Router.Routes.MidiPlayback:
-                ImGui.BeginChild("Screen", new(ImGui.GetContentRegionAvail().X, ImGui.GetIO().DisplaySize.Y - (ImGui.GetIO().DisplaySize.Y * 25f / 100)));
-                ScreenCanvas.RenderScreen();
-                ImGui.EndChild();
-
-                ImGui.GetForegroundDrawList().AddLine(new(0, ImGui.GetCursorPos().Y), new(ImGui.GetIO().DisplaySize.X, ImGui.GetCursorPos().Y), ImGui.GetColorU32(Settings.R_HandColor), 2);
-
-                ImGui.BeginChild("Keyboard", ImGui.GetContentRegionAvail());
-                PianoRenderer.RenderKeyboard();
-                ImGui.EndChild();
-                break;
-            case Router.Routes.PlayMode:
-                ImGui.BeginChild("Screen", new(ImGui.GetContentRegionAvail().X, ImGui.GetIO().DisplaySize.Y - (ImGui.GetIO().DisplaySize.Y * 25f / 100)));
-                ScreenCanvas.RenderScreen(true);
-                ImGui.EndChild();
-
-                ImGui.GetForegroundDrawList().AddLine(new(0, ImGui.GetCursorPos().Y), new(ImGui.GetIO().DisplaySize.X, ImGui.GetCursorPos().Y), ImGui.GetColorU32(Settings.R_HandColor), 2);
-
-                ImGui.BeginChild("Keyboard", ImGui.GetContentRegionAvail());
-                PianoRenderer.RenderKeyboard();
-                ImGui.EndChild();
-                break;
-            case Router.Routes.Settings:
-                Settings.Render();
-                break;
-        }
-        ImGui.End();
+        Process.GetCurrentProcess().Kill(); // temporary solution since process doesn't close when using ASIO4ALL
     }
 }
