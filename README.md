@@ -6,9 +6,15 @@
 ### ...is a customizable midi visualization software with similar features to Synthesia
   
 ---
-  ### :star2: *If you really enjoy the app consider starring the repo* :star2:
+### :star2: *If you really enjoy the app consider starring the repo* :star2:
 
-  :orange_book: [Documentation](https://openthesia.pages.dev/documentation) :orange_book:
+If you found this project helpful and want to learn how to build apps with a similar look, you might enjoy my book: 
+
+[![Buy the Book](https://img.shields.io/badge/Gumroad-Mastering_Dear_ImGui_in_C%23-blueviolet?style=for-the-badge)](https://imaxel.gumroad.com/l/mastering-dear-imgui-in-csharp) [![Buy the Book](https://img.shields.io/badge/Itch.io-Mastering_Dear_ImGui_in_C%23-indianred?style=for-the-badge)](https://imaxel0.itch.io/mastering-dear-imgui-in-csharp)
+
+---
+
+:orange_book: [Documentation](https://openthesia.pages.dev/documentation) :orange_book:
 
 ## What can it do :question:
 Openthesia includes two main modes, **Midi playback** and **Play mode**.
@@ -55,3 +61,5 @@ https://freepats.zenvoid.org/
 - [NAudio](https://github.com/naudio/NAudio)
 - [MeltySynth](https://github.com/sinshu/meltysynth)
 - [Dear ImGui](https://github.com/ocornut/imgui) & [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET)
+
+---
