@@ -16,6 +16,7 @@ using Openthesia.Core.FileDialogs;
 using Openthesia.Core.Midi;
 using Openthesia.Core.SoundFonts;
 using Openthesia.Enums;
+using Openthesia.Settings;
 
 namespace Openthesia.Ui.Windows;
 
@@ -58,7 +59,9 @@ public class SettingsWindow : ImGuiWindow
         ImGui.SetNextWindowPos(ImGui.GetIO().DisplaySize / 2 - new Vector2(ImGui.GetIO().DisplaySize.X / 1.5f, ImGui.GetIO().DisplaySize.Y / 1.4f) / 2);
         ImGui.BeginChild("Settings controls", new(ImGui.GetIO().DisplaySize.X / 1.5f, ImGui.GetIO().DisplaySize.Y / 1.2f), ImGuiChildFlags.AlwaysUseWindowPadding);
 
+        // MIDI DEVICES
         ImGui.Text($"MIDI DEVICES {FontAwesome6.Keyboard}");
+        ImGui.Spacing();
 
         if (InputDevice.GetDevicesCount() <= 0)
             ImGui.BeginDisabled();
@@ -104,7 +107,9 @@ public class SettingsWindow : ImGuiWindow
 
         ImGui.Dummy(new(50));
 
+        // MIDI PATHS
         ImGui.Text($"MIDI PATHS {FontAwesome6.FolderOpen}");
+        ImGui.Spacing();
 
         ImGui.BeginTable("Midi paths scan", 3, ImGuiTableFlags.PadOuterX | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
         ImGui.TableSetupColumn("Path");
@@ -166,6 +171,7 @@ public class SettingsWindow : ImGuiWindow
 
         // SOUND FONTS
         ImGui.Text($"SOUND FONTS {FontAwesome6.Music}");
+        ImGui.Spacing();
 
         if (ImGui.Checkbox("SoundFont engine", ref SoundFontEngine))
         {
@@ -320,12 +326,66 @@ public class SettingsWindow : ImGuiWindow
 
         // INPUT
         ImGui.Text($"INPUT {FontAwesome6.Keyboard}");
+        ImGui.Spacing();
+
         ImGui.Checkbox("Keyboard input", ref KeyboardInput);
         Drawings.Tooltip("When keyboard input is enabled, mouse input and shortcuts using letters are disabled");
 
         ImGui.Dummy(new(50));
 
+        // VIDEO RECORDING
+        ImGui.Text($"VIDEO RECORDING {FontAwesome6.Video}");
+        ImGui.Spacing();
+
+        ImGui.Checkbox("Auto Start Playback", ref VideoRecStartsPlayback);
+        ImGui.SetItemTooltip("When turned on, midi playback will automatically start when a video record is fired.");
+        ImGui.SameLine();
+        ImGui.Checkbox("Open Destination Folder", ref VideoRecOpenDestFolder);
+        ImGui.SetItemTooltip("When turned on, the destination folder of the recorded video clip will be opened on record stop.");
+        ImGui.SameLine();
+        ImGui.Checkbox("Auto Play", ref VideoRecAutoPlay);
+        ImGui.SetItemTooltip("When turned on, the recorded video clip will be played using your default video player on record stop.");
+
+        ImGui.Dummy(new(10));
+
+        int[] framerates = { 30, 60, 120 };
+        if (ImGui.BeginCombo("Recording Framerate", $"{VideoRecFramerate} FPS"))
+        {
+            foreach (var framerate in framerates)
+            {
+                if (ImGui.Selectable($"{framerate} FPS", framerate == VideoRecFramerate))
+                {
+                    SetVideoRecFramerate(framerate);
+                }
+            }
+            ImGui.EndCombo();
+        }
+        ImGui.SetItemTooltip("Framerate of the recording.\nUse 30 or 60 if you aim to share the video on platforms like YouTube.");
+
+        ImGui.Dummy(new(10));
+
+        ImGui.BeginDisabled();
+        ImGui.InputText("Destination Folder", ref VideoRecDestFolder, 10000, ImGuiInputTextFlags.ReadOnly);
+        ImGui.EndDisabled();
+        ImGui.SetItemTooltip("Folder where video recordings will be saved.");
+
+        ImGui.SameLine();
+        if (ImGui.Button($"Change {FontAwesome6.FolderClosed}##video_rec_path"))
+        {
+            var dlg = new FolderPicker();
+            dlg.InputPath = "C:\\";
+            if (dlg.ShowDialog(Program._window.Handle) == true)
+            {
+                SetVideoRecDestFolder(dlg.ResultPath);
+            }
+        }
+
+        ImGui.Dummy(new(50));
+
+        // LOOK AND FEEL
         ImGui.Text($"LOOK AND FEEL {FontAwesome6.Paintbrush}");
+        ImGui.Spacing();
+
         ImGui.SliderInt("Note block roundness", ref NoteRoundness, 0, 15);
 
         ImGui.Dummy(new(10));

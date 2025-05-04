@@ -84,6 +84,13 @@ public static class ProgramData
                 CoreSettings.SetSoundFontLatency(storedSettings.SoundFontLatency < 15 ? CoreSettings.SoundFontLatency : storedSettings.SoundFontLatency);
                 AudioDriverManager.SetAudioDriverType(storedSettings.AudioDriverType);
                 AudioDriverManager.SetAsioDriverDevice(storedSettings.SelectedAsioDriverName);
+                CoreSettings.SetVideoRecDestFolder(string.IsNullOrEmpty(storedSettings.VideoRecDestFolder) 
+                    ? KnownFolders.Videos.Path 
+                    : storedSettings.VideoRecDestFolder);
+                CoreSettings.SetVideoRecOpenDestFolder(storedSettings.VideoRecOpenDestFolder);
+                CoreSettings.SetVideoRecStartsPlayback(storedSettings.VideoRecStartsPlayback);
+                CoreSettings.SetVideoRecAutoPlay(storedSettings.VideoRecAutoPlay);
+                CoreSettings.SetVideoRecFramerate(storedSettings.VideoRecFramerate == 0 ? 60 : storedSettings.VideoRecFramerate);
             }
             catch (Exception ex)
             {
@@ -127,6 +134,11 @@ public static class ProgramData
             SoundFontLatency = CoreSettings.SoundFontLatency,
             AudioDriverType = AudioDriverManager.AudioDriverType,
             SelectedAsioDriverName = AudioDriverManager.SelectedAsioDriverName,
+            VideoRecDestFolder = CoreSettings.VideoRecDestFolder,
+            VideoRecOpenDestFolder = CoreSettings.VideoRecOpenDestFolder,
+            VideoRecStartsPlayback = CoreSettings.VideoRecStartsPlayback,
+            VideoRecAutoPlay = CoreSettings.VideoRecAutoPlay,
+            VideoRecFramerate = CoreSettings.VideoRecFramerate,
         };
 
         string json = JsonConvert.SerializeObject(data, settings);

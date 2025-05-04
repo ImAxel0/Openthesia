@@ -1,4 +1,6 @@
-﻿namespace Openthesia.Settings;
+﻿using Syroot.Windows.IO;
+
+namespace Openthesia.Settings;
 
 public static class CoreSettings
 {
@@ -28,6 +30,25 @@ public static class CoreSettings
 
     private static int _soundFontLatency = 75;
     public static ref int SoundFontLatency => ref _soundFontLatency;
+
+    #region Video Recording
+
+    private static string _videoRecDestFolder = KnownFolders.Videos.Path;
+    public static ref string VideoRecDestFolder => ref _videoRecDestFolder;
+
+    private static bool _videoRecStartsPlayback = true;
+    public static ref bool VideoRecStartsPlayback => ref _videoRecStartsPlayback;
+
+    private static bool _videoRecOpenDestFolder = true;
+    public static ref bool VideoRecOpenDestFolder => ref _videoRecOpenDestFolder;
+
+    private static bool _videoRecAutoPlay;
+    public static ref bool VideoRecAutoPlay => ref _videoRecAutoPlay;
+
+    private static int _videoRecFramerate = 60;
+    public static ref int VideoRecFramerate => ref _videoRecFramerate;
+
+    #endregion
 
     public static void SetKeyboardInput(bool onoff)
     {
@@ -74,4 +95,28 @@ public static class CoreSettings
         _soundFontLatency = value;
     }
 
+    public static void SetVideoRecDestFolder(string path)
+    {
+        _videoRecDestFolder = path;
+    }
+
+    public static void SetVideoRecStartsPlayback(bool onoff)
+    {
+        _videoRecStartsPlayback = onoff;
+    }
+
+    public static void SetVideoRecOpenDestFolder(bool onoff)
+    {
+        _videoRecOpenDestFolder = onoff;
+    }
+
+    public static void SetVideoRecAutoPlay(bool onoff)
+    {
+        _videoRecAutoPlay = onoff;
+    }
+
+    public static void SetVideoRecFramerate(int framerate)
+    {
+        _videoRecFramerate = framerate;
+    }
 }
