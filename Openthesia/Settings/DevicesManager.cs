@@ -47,6 +47,7 @@ public static class DevicesManager
     public static void ReleaseInputDevice()
     {
         IDevice?.Dispose();
+        IDevice = null;
     }
 
     public static void SetOutputDevice(int deviceIndex)
@@ -88,5 +89,6 @@ public static class DevicesManager
     public static void ReleaseOutputDevice()
     {
         ODevice?.Dispose();
+        ODevice = null;
     }
 }

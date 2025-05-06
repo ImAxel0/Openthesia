@@ -1,4 +1,5 @@
-﻿using Syroot.Windows.IO;
+﻿using Openthesia.Enums;
+using Syroot.Windows.IO;
 
 namespace Openthesia.Settings;
 
@@ -25,11 +26,17 @@ public static class CoreSettings
     private static int _noteRoundness = 7;
     public static ref int NoteRoundness => ref _noteRoundness;
 
-    private static bool _soundFontEngine;
-    public static ref bool SoundFontEngine => ref _soundFontEngine;
+    private static int _waveOutLatency = 75;
+    public static ref int WaveOutLatency => ref _waveOutLatency;
 
-    private static int _soundFontLatency = 75;
-    public static ref int SoundFontLatency => ref _soundFontLatency;
+    private static SoundEngine _soundEngine = SoundEngine.Plugins;
+    public static ref SoundEngine SoundEngine => ref _soundEngine;
+
+    private static bool _openPluginAtStart;
+    public static ref bool OpenPluginAtStart => ref _openPluginAtStart;
+
+    private static int _sampleRate = 44100;
+    public static int SampleRate => _sampleRate;
 
     #region Video Recording
 
@@ -85,14 +92,14 @@ public static class CoreSettings
         _noteRoundness = value;
     }
 
-    public static void SetUseSoundFontEngine(bool onoff)
-    {
-        _soundFontEngine = onoff;
-    }
-
     public static void SetSoundFontLatency(int value)
     {
-        _soundFontLatency = value;
+        _waveOutLatency = value;
+    }
+
+    public static void SetSoundEngine(SoundEngine soundEngine)
+    {
+        _soundEngine = soundEngine;
     }
 
     public static void SetVideoRecDestFolder(string path)
@@ -118,5 +125,10 @@ public static class CoreSettings
     public static void SetVideoRecFramerate(int framerate)
     {
         _videoRecFramerate = framerate;
+    }
+
+    public static void SetOpenPluginAtStartup(bool onoff)
+    {
+        _openPluginAtStart = onoff;
     }
 }

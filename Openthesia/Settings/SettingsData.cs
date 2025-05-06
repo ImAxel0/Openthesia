@@ -10,6 +10,8 @@ public class SettingsData
 
     public List<string> MidiPaths = new();
     public List<string> SoundFontsPaths = new();
+    public string InstrumentPath = string.Empty;
+    public List<string> EffectsPath = new();
 
     public bool KeyboardInput;
     public bool AnimatedBackground;
@@ -29,10 +31,11 @@ public class SettingsData
     public bool ShowTextNotes;
     public TextTypes TextType;
 
-    public bool SoundFontEngine;
-    public int SoundFontLatency;
+    public SoundEngine SoundEngine;
+    public int WaveOutLatency;
     public AudioDriverTypes AudioDriverType;
     public string SelectedAsioDriverName;
+    public bool OpenPluginAtStart;
 
     public string VideoRecDestFolder;
     public bool VideoRecStartsPlayback;

@@ -2,6 +2,7 @@
 using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Multimedia;
 using Openthesia.Core.FileDialogs;
+using Openthesia.Core.Plugins;
 using Openthesia.Settings;
 
 namespace Openthesia.Core.Midi;
@@ -27,7 +28,9 @@ public static class MidiFileHandler
             PlaybackCurrentTimeWatcher.Instance.RemovePlayback(MidiPlayer.Playback);
         }
 
-        MidiPlayer.Playback = midiFile.GetPlayback(DevicesManager.ODevice);
+        MidiPlayer.Playback = DevicesManager.ODevice != null
+            ? midiFile.GetPlayback(DevicesManager.ODevice) : midiFile.GetPlayback();
+
         MidiPlayer.Playback.TrackNotes = true;
         MidiPlayer.Playback.TrackProgram = true;
         MidiPlayer.Playback.EventPlayed += IOHandle.OnEventReceived;
@@ -58,7 +61,9 @@ public static class MidiFileHandler
             PlaybackCurrentTimeWatcher.Instance.RemovePlayback(MidiPlayer.Playback);
         }
 
-        MidiPlayer.Playback = midiFile.GetPlayback(DevicesManager.ODevice);
+        MidiPlayer.Playback = DevicesManager.ODevice != null
+            ? midiFile.GetPlayback(DevicesManager.ODevice) : midiFile.GetPlayback();
+
         MidiPlayer.Playback.TrackNotes = true;
         MidiPlayer.Playback.TrackProgram = true;
         MidiPlayer.Playback.EventPlayed += IOHandle.OnEventReceived;

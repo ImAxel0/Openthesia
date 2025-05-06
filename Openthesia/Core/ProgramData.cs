@@ -1,5 +1,6 @@
 ﻿using Melanchall.DryWetMidi.Multimedia;
 using Newtonsoft.Json;
+using Openthesia.Core.Plugins;
 using Openthesia.Core.SoundFonts;
 using Openthesia.Settings;
 using Syroot.Windows.IO;
@@ -9,7 +10,7 @@ namespace Openthesia.Core;
 
 public static class ProgramData
 {
-    public static readonly string ProgramVersion = "1.4.0";
+    public static readonly string ProgramVersion = "1.5.0";
     public static IntPtr LogoImage;
     public static string SettingsPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia", "Settings.json");
     public static string HandsDataPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia\\HandsData");
@@ -23,15 +24,37 @@ public static class ProgramData
         {
             DevicesManager.SetInputDevice(0);
         }
-        if (OutputDevice.GetDevicesCount() > 0 && DevicesManager.ODevice == null)
-        {
-            DevicesManager.SetOutputDevice(0);
-        }
         ImGuiTheme.PushTheme();
 
-        if (CoreSettings.SoundFontEngine)
+        if (CoreSettings.SoundEngine == Enums.SoundEngine.SoundFonts)
         {
             SoundFontPlayer.Initialize();
+        }
+        else if (CoreSettings.SoundEngine == Enums.SoundEngine.Plugins)
+        {
+            VstPlayer.Initialize();
+            if (!string.IsNullOrEmpty(PluginsPathManager.InstrumentPath))
+            {
+                var instrument = new VstPlugin(PluginsPathManager.InstrumentPath);
+                if (!CoreSettings.OpenPluginAtStart)
+                {
+                    instrument.PluginWindow.Close();
+                }
+                VstPlayer.PluginsChain?.AddPlugin(instrument);
+            }
+
+            foreach (var effect in PluginsPathManager.EffectsPath)
+            {
+                if (!string.IsNullOrEmpty(effect))
+                {
+                    var fx = new VstPlugin(effect);
+                    if (!CoreSettings.OpenPluginAtStart)
+                    {
+                        fx.PluginWindow.Close();
+                    }
+                    VstPlayer.PluginsChain?.AddPlugin(fx);
+                }
+            }
         }
     }
 
@@ -65,6 +88,8 @@ public static class ProgramData
 
                 MidiPathsManager.SetMidiPaths(storedSettings.MidiPaths);
                 SoundFontsPathsManager.SetSoundFontsPaths(storedSettings.SoundFontsPaths);
+                PluginsPathManager.SetInstrumentPath(storedSettings.InstrumentPath);
+                PluginsPathManager.SetEffectsPath(storedSettings.EffectsPath);
                 CoreSettings.SetKeyboardInput(storedSettings.KeyboardInput);
                 CoreSettings.SetAnimatedBackground(storedSettings.AnimatedBackground);
                 CoreSettings.SetNeonFx(storedSettings.NeonFx);
@@ -80,8 +105,8 @@ public static class ProgramData
                 ScreenCanvasControls.SetUpDirection(storedSettings.UpDirection);
                 ScreenCanvasControls.SetTextNotes(storedSettings.ShowTextNotes);
                 ScreenCanvasControls.SetTextType(storedSettings.TextType);
-                CoreSettings.SetUseSoundFontEngine(storedSettings.SoundFontEngine);
-                CoreSettings.SetSoundFontLatency(storedSettings.SoundFontLatency < 15 ? CoreSettings.SoundFontLatency : storedSettings.SoundFontLatency);
+                CoreSettings.SetSoundEngine(storedSettings.SoundEngine);
+                CoreSettings.SetSoundFontLatency(storedSettings.WaveOutLatency < 15 ? CoreSettings.WaveOutLatency : storedSettings.WaveOutLatency);
                 AudioDriverManager.SetAudioDriverType(storedSettings.AudioDriverType);
                 AudioDriverManager.SetAsioDriverDevice(storedSettings.SelectedAsioDriverName);
                 CoreSettings.SetVideoRecDestFolder(string.IsNullOrEmpty(storedSettings.VideoRecDestFolder) 
@@ -91,6 +116,7 @@ public static class ProgramData
                 CoreSettings.SetVideoRecStartsPlayback(storedSettings.VideoRecStartsPlayback);
                 CoreSettings.SetVideoRecAutoPlay(storedSettings.VideoRecAutoPlay);
                 CoreSettings.SetVideoRecFramerate(storedSettings.VideoRecFramerate == 0 ? 60 : storedSettings.VideoRecFramerate);
+                CoreSettings.SetOpenPluginAtStartup(storedSettings.OpenPluginAtStart);
             }
             catch (Exception ex)
             {
@@ -109,12 +135,31 @@ public static class ProgramData
             ObjectCreationHandling = ObjectCreationHandling.Replace,
         };
 
+        // Update effect plugins order for next run
+        if (CoreSettings.SoundEngine == Enums.SoundEngine.Plugins && VstPlayer.PluginsChain != null)
+        {
+            PluginsPathManager.EffectsPath.Clear();
+            foreach (var effect in VstPlayer.PluginsChain.FxPlugins)
+            {
+                if (effect is VstPlugin vst)
+                {
+                    var path = vst.PluginContext.Find<string>("PluginPath");
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        PluginsPathManager.EffectsPath.Add(path);
+                    }
+                }
+            }
+        }
+
         var data = new SettingsData()
         {
             InputDevice = DevicesManager.IDevice?.Name,
             OutputDevice = DevicesManager.ODevice?.Name,
             MidiPaths = MidiPathsManager.MidiPaths,
             SoundFontsPaths = SoundFontsPathsManager.SoundFontsPaths,
+            InstrumentPath = PluginsPathManager.InstrumentPath,
+            EffectsPath = PluginsPathManager.EffectsPath,
             KeyboardInput = CoreSettings.KeyboardInput,
             AnimatedBackground = CoreSettings.AnimatedBackground,
             NeonFx = CoreSettings.NeonFx,
@@ -130,8 +175,8 @@ public static class ProgramData
             UpDirection = ScreenCanvasControls.UpDirection,
             ShowTextNotes = ScreenCanvasControls.ShowTextNotes,
             TextType = ScreenCanvasControls.TextType,
-            SoundFontEngine = CoreSettings.SoundFontEngine,
-            SoundFontLatency = CoreSettings.SoundFontLatency,
+            SoundEngine = CoreSettings.SoundEngine,
+            WaveOutLatency = CoreSettings.WaveOutLatency,
             AudioDriverType = AudioDriverManager.AudioDriverType,
             SelectedAsioDriverName = AudioDriverManager.SelectedAsioDriverName,
             VideoRecDestFolder = CoreSettings.VideoRecDestFolder,
@@ -139,6 +184,7 @@ public static class ProgramData
             VideoRecStartsPlayback = CoreSettings.VideoRecStartsPlayback,
             VideoRecAutoPlay = CoreSettings.VideoRecAutoPlay,
             VideoRecFramerate = CoreSettings.VideoRecFramerate,
+            OpenPluginAtStart = CoreSettings.OpenPluginAtStart,
         };
 
         string json = JsonConvert.SerializeObject(data, settings);

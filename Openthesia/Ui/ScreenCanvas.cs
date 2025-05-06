@@ -14,6 +14,9 @@ using Veldrid;
 using ScreenRecorderLib;
 using Note = Melanchall.DryWetMidi.Interaction.Note;
 using static Openthesia.Core.ScreenCanvasControls;
+using Openthesia.Core.Plugins;
+using Openthesia.Core.FileDialogs;
+using Vanara.PInvoke;
 
 namespace Openthesia.Ui;
 
@@ -27,6 +30,7 @@ public class ScreenCanvas
     private static bool _comboFallSpeed;
     private static bool _comboPlaybackSpeed;
     private static bool _comboSoundFont;
+    private static bool _comboPlugins;
 
     private static Vector2 _rectStart;
     private static Vector2 _rectEnd;
@@ -621,7 +625,7 @@ public class ScreenCanvas
             GetInputs();
 
             var showTopBar = ImGui.IsMouseHoveringRect(Vector2.Zero, new(ImGui.GetIO().DisplaySize.X, 300));
-            if (_comboFallSpeed || _comboPlaybackSpeed || _leftHandColorPicker || _rightHandColorPicker || _comboSoundFont)
+            if (_comboFallSpeed || _comboPlaybackSpeed || _leftHandColorPicker || _rightHandColorPicker || _comboSoundFont || _comboPlugins)
                 showTopBar = true;
 
             if (playMode)
@@ -890,6 +894,7 @@ public class ScreenCanvas
 
         // BACK BUTTON
         ImGui.PushFont(FontController.Font16_Icon16);
+        ImGui.BeginDisabled(ScreenRecorder.Status == RecorderStatus.Recording);
         ImGui.SetCursorScreenPos(new(ImGuiUtils.FixedSize(new Vector2(25)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(50)).Y));
         if (ImGui.Button(FontAwesome6.ArrowLeftLong, ImGuiUtils.FixedSize(new Vector2(100, 50))) || ImGui.IsKeyPressed(ImGuiKey.Escape, false))
         {
@@ -901,6 +906,7 @@ public class ScreenCanvas
             var route = playMode ? Enums.Windows.Home : Enums.Windows.MidiBrowser;
             WindowsManager.SetWindow(route);
         }
+        ImGui.EndDisabled();
         ImGui.PopFont();
 
         var neonIcon = CoreSettings.NeonFx ? FontAwesome6.Lightbulb : FontAwesome6.PowerOff;
@@ -928,7 +934,7 @@ public class ScreenCanvas
 
         _rightHandColorPicker = ImGui.IsPopupOpen("Right Hand Colorpicker");
 
-        if (CoreSettings.SoundFontEngine)
+        if (CoreSettings.SoundEngine == SoundEngine.SoundFonts)
         {
             // SOUNDFONTS DROPDOWN LIST
             ImGui.SetCursorScreenPos(new(ImGuiUtils.FixedSize(new Vector2(140)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(50)).Y));
@@ -951,13 +957,89 @@ public class ScreenCanvas
             else
                 _comboSoundFont = false;
         }
+        else if (CoreSettings.SoundEngine == SoundEngine.Plugins)
+        {
+            var instrument = VstPlayer.PluginsChain?.PluginInstrument;
+            var name = instrument == null ? "No Plugin Instrument" : instrument.PluginName;
+
+            // PLUGINS DROPDOWN LIST
+            ImGui.SetCursorScreenPos(new(ImGuiUtils.FixedSize(new Vector2(140)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(50)).Y));
+            if (ImGui.BeginCombo("##Plugins", name, ImGuiComboFlags.HeightLargest | ImGuiComboFlags.WidthFitPreview))
+            {
+                _comboPlugins = true;
+
+                ImGui.SeparatorText("Instrument");
+
+                ImGui.Text(name);
+                ImGui.SameLine();
+                if (ImGui.SmallButton($"{FontAwesome6.ScrewdriverWrench}##tweak_instrument") && instrument is VstPlugin vstInstrument)
+                {
+                    vstInstrument.OpenPluginWindow();
+                }
+                ImGui.SameLine();
+                if (ImGui.SmallButton($"{FontAwesome6.FolderOpen}##change_instrument"))
+                {
+                    var dialog = new OpenFileDialog()
+                    {
+                        Title = "Select a VST2 plugin instrument",
+                        Filter = "vst plugin (*.dll)|*.dll"
+                    };
+                    dialog.ShowOpenFileDialog();
+
+                    if (dialog.Success)
+                    {
+                        var file = new FileInfo(dialog.Files.First());
+                        var plugin = new VstPlugin(file.FullName);
+                        if (plugin.PluginType != PluginType.Instrument)
+                        {
+                            plugin.Dispose();
+                            User32.MessageBox(IntPtr.Zero, "Plugin is not an instrument.", "Error Loading Plugin",
+                                User32.MB_FLAGS.MB_ICONERROR | User32.MB_FLAGS.MB_TOPMOST);
+                        }
+                        else
+                        {
+                            VstPlayer.PluginsChain.AddPlugin(plugin);
+                            PluginsPathManager.SetInstrumentPath(file.FullName);
+                        }
+                    }
+                }
+
+                ImGui.Spacing();
+                ImGui.SeparatorText("Effects");
+
+                foreach (var effect in VstPlayer.PluginsChain.FxPlugins.ToList())
+                {
+                    ImGui.AlignTextToFramePadding();
+                    ImGui.Text(effect.PluginName);
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton($"{FontAwesome6.ScrewdriverWrench}##tweak_effect{effect.PluginId}") && effect is VstPlugin vstEffect)
+                    {
+                        vstEffect.OpenPluginWindow();
+                    }
+                    bool enabled = effect.Enabled;
+                    string state = enabled ? "ON" : "OFF";
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton($"{state}##{effect.PluginId}"))
+                    {
+                        effect.Enabled = !effect.Enabled;
+                    }
+                }
+
+                ImGui.EndCombo();
+            }
+            else
+                _comboPlugins = false;
+        }
 
         // SUSTAIN PEDAL BUTTON
         ImGui.SetCursorPos(new Vector2(ImGui.GetIO().DisplaySize.X - ImGuiUtils.FixedSize(new Vector2(75)).X, ImGui.GetWindowSize().Y - ImGuiUtils.FixedSize(new Vector2(60)).Y));
         if (ImGui.ImageButton("SustainBtn", IOHandle.SustainPedalActive ? Drawings.SustainPedalOn : Drawings.SustainPedalOff,
             new Vector2(50)))
         {
-            DevicesManager.ODevice.SendEvent(new ControlChangeEvent(new SevenBitNumber(64), new SevenBitNumber((byte)(IOHandle.SustainPedalActive ? 0 : 100))));
+            IOHandle.OnEventReceived(null, new Melanchall.DryWetMidi.Multimedia.MidiEventReceivedEventArgs(
+                new ControlChangeEvent(ControlUtilities.AsSevenBitNumber(ControlName.DamperPedal),
+                new SevenBitNumber((byte)(IOHandle.SustainPedalActive ? 0 : 100)))));
+            DevicesManager.ODevice?.SendEvent(new ControlChangeEvent(new SevenBitNumber(64), new SevenBitNumber((byte)(IOHandle.SustainPedalActive ? 0 : 100))));
         }
     }
 

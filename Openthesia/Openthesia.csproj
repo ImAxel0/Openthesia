@@ -8,7 +8,32 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ApplicationIcon>logo.ico</ApplicationIcon>
     <Platforms>AnyCPU;x64</Platforms>
+    <Configurations>Debug;Release;SupporterDebug;SupporterRelease</Configurations>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterDebug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterDebug|x64'">
+    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterRelease|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterRelease|x64'">
+    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
 
   <ItemGroup>
     <None Remove="Core\Resources\ckey.png" />
@@ -52,6 +77,7 @@
     <PackageReference Include="Veldrid" Version="4.9.0" />
     <PackageReference Include="Veldrid.ImageSharp" Version="4.9.0" />
     <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />
+    <PackageReference Include="VST.NET2-Host" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

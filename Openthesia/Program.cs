@@ -6,6 +6,8 @@ using System.Numerics;
 using ImGuiNET;
 using Vanara.PInvoke;
 using Openthesia.Core;
+using Openthesia.Core.Plugins;
+using Openthesia.Settings;
 
 namespace Openthesia;
 
@@ -23,8 +25,14 @@ class Program
     {
         User32.SetProcessDPIAware();
 
+#if SUPPORTER
+        string title = "Openthesia SE";
+#else
+        string title = "Openthesia";
+#endif
+
         VeldridStartup.CreateWindowAndGraphicsDevice(
-            new WindowCreateInfo(50, 50, 1280, 720, WindowState.Maximized, $"Openthesia {ProgramData.ProgramVersion}"),
+            new WindowCreateInfo(50, 50, 1280, 720, WindowState.Maximized, $"{title} {ProgramData.ProgramVersion}"),
             new GraphicsDeviceOptions(false, null, true, ResourceBindingModel.Improved, true, true),
             out _window,
             out _gd);
@@ -65,8 +73,25 @@ class Program
 
             if (ImGui.IsKeyPressed(ImGuiKey.F11, false))
             {
-                var windowsState = _window.WindowState == WindowState.BorderlessFullScreen ? WindowState.Normal : WindowState.BorderlessFullScreen;
+                var windowsState = _window.WindowState == WindowState.BorderlessFullScreen 
+                    ? WindowState.Normal 
+                    : WindowState.BorderlessFullScreen;
                 _window.WindowState = windowsState;
+            }
+
+            if (CoreSettings.SoundEngine == Enums.SoundEngine.Plugins)
+            {
+                if (VstPlayer.PluginsChain?.PluginInstrument is VstPlugin instrument)
+                {
+                    instrument.PluginWindow.PumpEvents();
+                }
+                foreach (var plugin in VstPlayer.PluginsChain.FxPlugins)
+                {
+                    if (plugin is VstPlugin plug)
+                    {
+                        plug.PluginWindow.PumpEvents();
+                    }
+                }
             }
 
             app.OnUpdate();
