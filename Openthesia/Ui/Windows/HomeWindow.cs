@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using Openthesia.Core;
+using Openthesia.Core.Plugins;
 using Openthesia.Settings;
 using Openthesia.Ui.Helpers;
 using System.Diagnostics;

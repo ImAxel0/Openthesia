@@ -7,7 +7,33 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ApplicationIcon>logo.ico</ApplicationIcon>
+    <Platforms>AnyCPU;x64</Platforms>
+    <Configurations>Debug;Release;SupporterDebug;SupporterRelease</Configurations>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterDebug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterDebug|x64'">
+    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterRelease|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterRelease|x64'">
+    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
 
   <ItemGroup>
     <None Remove="Core\Resources\ckey.png" />
@@ -45,11 +71,13 @@
     <PackageReference Include="MeltySynth" Version="2.4.1" />
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="ScreenRecorderLib" Version="6.5.1" />
     <PackageReference Include="Syroot.Windows.IO.KnownFolders" Version="1.3.0" />
     <PackageReference Include="Vanara.PInvoke.User32" Version="3.4.17" />
     <PackageReference Include="Veldrid" Version="4.9.0" />
     <PackageReference Include="Veldrid.ImageSharp" Version="4.9.0" />
     <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />
+    <PackageReference Include="VST.NET2-Host" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

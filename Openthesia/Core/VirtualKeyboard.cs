@@ -36,7 +36,7 @@ public static class VirtualKeyboard
                 IOHandle.OnEventReceived(null,
                     new Melanchall.DryWetMidi.Multimedia.MidiEventReceivedEventArgs(new NoteOnEvent(new SevenBitNumber((byte)(_keyNoteMap[key] + _octaveShift)),
                     new SevenBitNumber((byte)_velocity))));
-                DevicesManager.ODevice.SendEvent(new NoteOnEvent(new SevenBitNumber((byte)(_keyNoteMap[key] + _octaveShift)), new SevenBitNumber((byte)_velocity)));
+                DevicesManager.ODevice?.SendEvent(new NoteOnEvent(new SevenBitNumber((byte)(_keyNoteMap[key] + _octaveShift)), new SevenBitNumber((byte)_velocity)));
                 _isKeyDown = true;
             }
 
@@ -45,7 +45,7 @@ public static class VirtualKeyboard
                 IOHandle.OnEventReceived(null,
                     new Melanchall.DryWetMidi.Multimedia.MidiEventReceivedEventArgs(new NoteOffEvent(new SevenBitNumber((byte)(_keyNoteMap[key] + _octaveShift)),
                     new SevenBitNumber(0))));
-                DevicesManager.ODevice.SendEvent(new NoteOffEvent(new SevenBitNumber((byte)(_keyNoteMap[key] + _octaveShift)), new SevenBitNumber(0)));
+                DevicesManager.ODevice?.SendEvent(new NoteOffEvent(new SevenBitNumber((byte)(_keyNoteMap[key] + _octaveShift)), new SevenBitNumber(0)));
                 _isKeyDown = false;
             }
         }

@@ -9,7 +9,11 @@ public static class WindowsManager
     {
         if (window != Windows.MidiPlayback && window != Windows.PlayMode)
         {
+#if SUPPORTER
+            Program._window.Title = $"Openthesia SE {ProgramData.ProgramVersion}";
+#else
             Program._window.Title = $"Openthesia {ProgramData.ProgramVersion}";
+#endif
         }
 
         foreach (var win in Application.AppInstance.GetWindows())

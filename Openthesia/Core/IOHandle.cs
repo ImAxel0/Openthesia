@@ -1,6 +1,8 @@
 ﻿using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using Openthesia.Core.Midi;
+using Openthesia.Core.Plugins;
+using Openthesia.Settings;
 using Openthesia.Ui;
 
 namespace Openthesia.Core;
@@ -50,7 +52,7 @@ public static class IOHandle
             };
             NoteRects.Add(note);
         }
-        //MidiPlayer.RealTimeSoundFontPlayer.Synthesizer.ProcessMidiMessage(0, 144 /*NOTE ON*/, ev.NoteNumber, ev.Velocity);
+
         MidiPlayer.SoundFontEngine?.PlayNote(0, ev.NoteNumber, ev.Velocity);
         PressedKeys.Add(ev.NoteNumber);
     }
@@ -103,6 +105,11 @@ public static class IOHandle
     {
         var eType = e.Event.EventType;
 
+        if (CoreSettings.SoundEngine == Enums.SoundEngine.Plugins)
+        {
+            VstPlayer.PluginsChain?.PluginInstrument?.ReceiveMidiEvent(e.Event);
+        }
+
         switch (eType)
         {
             case MidiEventType.NoteOn:
@@ -133,6 +140,11 @@ public static class IOHandle
         // return in learning mode to prevent key presses
         if (ScreenCanvasControls.IsLearningMode)
             return;
+
+        if (CoreSettings.SoundEngine == Enums.SoundEngine.Plugins)
+        {
+            VstPlayer.PluginsChain?.PluginInstrument?.ReceiveMidiEvent(e.Event);
+        }
 
         var eType = e.Event.EventType;
 

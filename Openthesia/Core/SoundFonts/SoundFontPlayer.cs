@@ -59,7 +59,7 @@ public class SoundFontPlayer
             _asioOut?.Dispose();
 
             _waveOut = new WaveOutEvent();
-            _waveOut.DesiredLatency = CoreSettings.SoundFontLatency;
+            _waveOut.DesiredLatency = CoreSettings.WaveOutLatency;
             _waveOut.Init(_midiSampleProvider);
             _waveOut.Play();
         }
@@ -117,7 +117,7 @@ public class SoundFontPlayer
 
     public void PlayNote(int channel, int noteNumber, int velocity)
     {
-        if (!CoreSettings.SoundFontEngine)
+        if (CoreSettings.SoundEngine != SoundEngine.SoundFonts)
             return;
 
         _synthesizer.NoteOn(channel, noteNumber, velocity);
@@ -125,7 +125,7 @@ public class SoundFontPlayer
 
     public void StopNote(int channel, int noteNumber)
     {
-        if (!CoreSettings.SoundFontEngine)
+        if (CoreSettings.SoundEngine != SoundEngine.SoundFonts)
             return;
 
         _synthesizer.NoteOff(channel, noteNumber);
@@ -133,7 +133,7 @@ public class SoundFontPlayer
 
     public void StopAllNote(int channel)
     {
-        if (!CoreSettings.SoundFontEngine)
+        if (CoreSettings.SoundEngine != SoundEngine.SoundFonts)
             return;
 
         _synthesizer.NoteOffAll(channel, false);

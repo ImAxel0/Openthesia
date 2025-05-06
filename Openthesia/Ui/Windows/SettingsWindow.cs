@@ -16,6 +16,9 @@ using Openthesia.Core.FileDialogs;
 using Openthesia.Core.Midi;
 using Openthesia.Core.SoundFonts;
 using Openthesia.Enums;
+using Openthesia.Settings;
+using Openthesia.Core.Plugins;
+using System.IO;
 
 namespace Openthesia.Ui.Windows;
 
@@ -58,7 +61,9 @@ public class SettingsWindow : ImGuiWindow
         ImGui.SetNextWindowPos(ImGui.GetIO().DisplaySize / 2 - new Vector2(ImGui.GetIO().DisplaySize.X / 1.5f, ImGui.GetIO().DisplaySize.Y / 1.4f) / 2);
         ImGui.BeginChild("Settings controls", new(ImGui.GetIO().DisplaySize.X / 1.5f, ImGui.GetIO().DisplaySize.Y / 1.2f), ImGuiChildFlags.AlwaysUseWindowPadding);
 
+        // MIDI DEVICES
         ImGui.Text($"MIDI DEVICES {FontAwesome6.Keyboard}");
+        ImGui.Spacing();
 
         if (InputDevice.GetDevicesCount() <= 0)
             ImGui.BeginDisabled();
@@ -87,6 +92,11 @@ public class SettingsWindow : ImGuiWindow
         var outputName = ODevice != null ? ODevice.Name : "None";
         if (ImGui.BeginCombo($"Output device {FontAwesome6.CircleArrowLeft}", outputName))
         {
+            if (ImGui.Selectable("None"))
+            {
+                ReleaseOutputDevice();
+            }
+
             for (int i = 0; i < OutputDevice.GetAll().Count; i++)
             {
                 if (ImGui.Selectable(OutputDevice.GetByIndex(i).Name))
@@ -104,7 +114,9 @@ public class SettingsWindow : ImGuiWindow
 
         ImGui.Dummy(new(50));
 
+        // MIDI PATHS
         ImGui.Text($"MIDI PATHS {FontAwesome6.FolderOpen}");
+        ImGui.Spacing();
 
         ImGui.BeginTable("Midi paths scan", 3, ImGuiTableFlags.PadOuterX | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
         ImGui.TableSetupColumn("Path");
@@ -134,7 +146,7 @@ public class SettingsWindow : ImGuiWindow
             ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = new Vector4(1, 0, 0.2f, 1);
             ImGui.PushFont(FontController.Font16_Icon12);
             ImGui.PushID(index.ToString());
-            if (ImGui.SmallButton(FontAwesome6.CircleXmark))
+            if (ImGui.SmallButton($"{FontAwesome6.CircleXmark}##remove_midi_path"))
             {
                 MidiPaths.Remove(path);
             }
@@ -164,20 +176,39 @@ public class SettingsWindow : ImGuiWindow
             }
         }
 
-        // SOUND FONTS
-        ImGui.Text($"SOUND FONTS {FontAwesome6.Music}");
+        // SOUND
+        ImGui.Text($"SOUND {FontAwesome6.Music}");
+        ImGui.Spacing();
 
-        if (ImGui.Checkbox("SoundFont engine", ref SoundFontEngine))
+        if (ImGui.BeginCombo("Sound Engine", CoreSettings.SoundEngine.ToString()))
         {
-            // if sound font wasn't loaded at startup, load it on enable
-            if (SoundFontEngine && MidiPlayer.SoundFontEngine == null)
+            foreach (var engine in Enum.GetValues<SoundEngine>())
             {
-                SoundFontPlayer.Initialize();
-            }
-        }
-        Drawings.Tooltip("If enabled, built in or external soundfonts will be used for audio playback");
+                bool enabled = true;
+#if !SUPPORTER
+                if (engine == Enums.SoundEngine.Plugins)
+                    enabled = false;
+#endif
+                if (ImGui.Selectable(engine.ToString(), engine == CoreSettings.SoundEngine, enabled ? ImGuiSelectableFlags.None : ImGuiSelectableFlags.Disabled))
+                {
+                    SetSoundEngine(engine);
 
-        if (SoundFontEngine)
+                    User32.MessageBox(IntPtr.Zero, "A restart of the application is required to apply the changes.\n" +
+                        "The app will automatically close after closing this window.", "Info",
+                        User32.MB_FLAGS.MB_ICONINFORMATION | User32.MB_FLAGS.MB_TOPMOST);
+
+                    Application.AppInstance.Quit();
+                }
+
+                if (engine == Enums.SoundEngine.SoundFonts)
+                    ImGui.SetItemTooltip("Built in or external soundfonts will be used for audio playback");
+                else if (engine == Enums.SoundEngine.Plugins)
+                    ImGui.SetItemTooltip("VST Plugins will be used for audio playback and processing");
+            }
+            ImGui.EndCombo();
+        }
+
+        if (CoreSettings.SoundEngine != Enums.SoundEngine.None)
         {
             ImGui.Dummy(new(10));
 
@@ -195,17 +226,19 @@ public class SettingsWindow : ImGuiWindow
                             // if switching to ASIO, select the first availible driver
                             SetAsioDriverDevice(AsioOut.GetDriverNames()[0]);
                         }
-                        // change driver type then re-initialize the sound font engine
+                        // change driver type
                         SetAudioDriverType(driver);
-                        SoundFontPlayer.Initialize();
 
-                        User32.MessageBox(IntPtr.Zero, "A restart of the application may be required", "Info", 
+                        User32.MessageBox(IntPtr.Zero, "A restart of the application is required.\n" +
+                            "The app will automatically close after closing this window.", "Info", 
                             User32.MB_FLAGS.MB_TOPMOST | User32.MB_FLAGS.MB_ICONINFORMATION);
+
+                        Application.AppInstance.Quit();
                     }
                 }
                 ImGui.EndCombo();
             }
-            Drawings.Tooltip("Driver used by SoundFonts for sound playback\n" +
+            Drawings.Tooltip("Driver used by SoundFonts or Plugins for sound playback\n" +
                 "- WaveOut: higher latency, good enough for listening only\n" +
                 "- ASIO: lower latency, ideal if playing a midi instrument");
 
@@ -215,7 +248,10 @@ public class SettingsWindow : ImGuiWindow
                 ImGui.SameLine();
                 if (ImGui.Button("ASIO settings"))
                 {
-                    MidiPlayer.SoundFontEngine?.AsioOut.ShowControlPanel();
+                    if (CoreSettings.SoundEngine == Enums.SoundEngine.SoundFonts)
+                        MidiPlayer.SoundFontEngine?.AsioOut.ShowControlPanel();
+                    else if (CoreSettings.SoundEngine == Enums.SoundEngine.Plugins)
+                        VstPlayer.AsioOut?.ShowControlPanel();
                 }
                 ImGui.PopStyleColor();
 
@@ -228,10 +264,12 @@ public class SettingsWindow : ImGuiWindow
                         if (ImGui.Selectable(driver))
                         {
                             SetAsioDriverDevice(driver);
-                            SoundFontPlayer.Initialize();
 
-                            User32.MessageBox(IntPtr.Zero, "A restart of the application may be required", "Info",
+                            User32.MessageBox(IntPtr.Zero, "A restart of the application is required.\n" +
+                                "The app will automatically close after closing this window.", "Info",
                                 User32.MB_FLAGS.MB_TOPMOST | User32.MB_FLAGS.MB_ICONINFORMATION);
+
+                            Application.AppInstance.Quit();
                         }
                     }
                     ImGui.EndCombo();
@@ -242,9 +280,12 @@ public class SettingsWindow : ImGuiWindow
             {
                 ImGui.Dummy(new(10));
 
-                if (ImGui.SliderInt("SoundFont latency (WaveOut driver only)", ref SoundFontLatency, 15, 300, "%i", ImGuiSliderFlags.AlwaysClamp | ImGuiSliderFlags.NoInput))
+                if (ImGui.SliderInt("SoundFont latency (WaveOut driver only)", ref WaveOutLatency, 15, 300, "%i", ImGuiSliderFlags.AlwaysClamp | ImGuiSliderFlags.NoInput))
                 {
-                    MidiPlayer.SoundFontEngine?.ChangeLatency(SoundFontLatency);
+                    if (CoreSettings.SoundEngine == Enums.SoundEngine.SoundFonts)
+                        MidiPlayer.SoundFontEngine?.ChangeLatency(WaveOutLatency);
+                    else if (CoreSettings.SoundEngine == Enums.SoundEngine.Plugins)
+                        VstPlayer.ChangeLatency(WaveOutLatency);
                 }
                 Drawings.Tooltip("Lower values reduce sound lag but can introduce audio artifacts, " +
                     "values under 100 are recommended for an optimal playback (default = 75)");
@@ -252,6 +293,10 @@ public class SettingsWindow : ImGuiWindow
         }
 
         ImGui.Dummy(new(10));
+
+        // SOUNDFONTS
+        ImGui.Text($"SOUND FONTS {FontAwesome6.FolderOpen}");
+        ImGui.Spacing();
 
         ImGui.BeginTable("Sound fonts paths scan", 3, ImGuiTableFlags.PadOuterX | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
         ImGui.TableSetupColumn("Path");
@@ -285,7 +330,7 @@ public class SettingsWindow : ImGuiWindow
             ImGuiTheme.Style.Colors[(int)ImGuiCol.Text] = new Vector4(1, 0, 0.2f, 1);
             ImGui.PushFont(FontController.Font16_Icon12);
             ImGui.PushID(index2.ToString());
-            if (ImGui.SmallButton(FontAwesome6.CircleXmark))
+            if (ImGui.SmallButton($"{FontAwesome6.CircleXmark}##remove_soundfont_path"))
             {
                 SoundFontsPaths.Remove(path);
             }
@@ -318,14 +363,243 @@ public class SettingsWindow : ImGuiWindow
             }
         }
 
+        // PLUGINS
+        ImGui.Text($"PLUGINS (VST) {FontAwesome6.Plug}");
+        ImGui.Spacing();
+
+#if !SUPPORTER
+        ImGui.TextColored(new Vector4(1, 0, 0.4f, 1), "Plugins are disabled. Get the SUPPORTER EDITION to start using them.");
+#endif
+        ImGui.Dummy(new(10));
+
+        ImGui.Checkbox("Open plugins at startup", ref OpenPluginAtStart);
+        ImGui.SetItemTooltip("When on, plugin windows are opened when the application is run.");
+
+        ImGui.Dummy(new(10));
+
+        ImGui.SeparatorText("Plugin Instrument");
+
+        string instrumentName = VstPlayer.PluginsChain?.PluginInstrument == null
+            ? "None" : VstPlayer.PluginsChain.PluginInstrument.PluginName;
+
+        ImGui.BeginDisabled();
+        ImGui.InputText("##instrument", ref instrumentName, 1000, ImGuiInputTextFlags.ReadOnly);
+        ImGui.EndDisabled();
+
+        if (VstPlayer.PluginsChain?.PluginInstrument is VstPlugin vst)
+        {
+            ImGui.SameLine();
+            if (ImGui.Button(FontAwesome6.ScrewdriverWrench))
+            {
+                vst.OpenPluginWindow();
+            }
+        }
+
+        ImGui.SameLine();
+        ImGui.BeginDisabled(CoreSettings.SoundEngine != Enums.SoundEngine.Plugins);
+        if (ImGui.Button($"Choose##plugin_instrument"))
+        {
+            var dialog = new OpenFileDialog()
+            {
+                Title = "Select a VST2 plugin instrument",
+                Filter = "vst plugin (*.dll)|*.dll"
+            };
+            dialog.ShowOpenFileDialog();
+
+            if (dialog.Success)
+            {
+                var file = new FileInfo(dialog.Files.First());
+                var plugin = new VstPlugin(file.FullName);
+                if (plugin.PluginType != PluginType.Instrument)
+                {
+                    plugin.Dispose();
+                    User32.MessageBox(IntPtr.Zero, "Plugin is not an instrument.", "Error Loading Plugin", 
+                        User32.MB_FLAGS.MB_ICONERROR | User32.MB_FLAGS.MB_TOPMOST);
+                }
+                else
+                {
+                    VstPlayer.PluginsChain.AddPlugin(plugin);
+                    PluginsPathManager.SetInstrumentPath(file.FullName);
+                }
+            }
+        }
+        ImGui.EndDisabled();
+
+        ImGui.Dummy(new(10));
+        ImGui.SeparatorText("Plugin Effects");
+
+        ImGui.BeginDisabled();
+        if (CoreSettings.SoundEngine != Enums.SoundEngine.Plugins || VstPlayer.PluginsChain?.FxPlugins.Count == 0)
+        {
+            string effectName = "None";
+            ImGui.InputText("##fx", ref effectName, 100, ImGuiInputTextFlags.ReadOnly);
+
+            ImGui.SameLine();
+            ImGui.ArrowButton("move_up", ImGuiDir.Up);
+            ImGui.SameLine();
+            ImGui.ArrowButton("move_down", ImGuiDir.Down);
+        }
+        else if (CoreSettings.SoundEngine == Enums.SoundEngine.Plugins && VstPlayer.PluginsChain != null)
+        {
+            foreach (var effect in VstPlayer.PluginsChain.FxPlugins.ToList())
+            {
+                string effectName = effect.PluginName;
+                ImGui.InputText($"##{effect.PluginId}", ref effectName, 1000, ImGuiInputTextFlags.ReadOnly);
+
+                bool enabled = effect.Enabled;
+
+                ImGui.SameLine();
+                ImGui.EndDisabled();
+                if (ImGui.Checkbox($"##enabled{effect.PluginId}", ref enabled))
+                {
+                    effect.Enabled = !effect.Enabled;
+                }
+                ImGui.SameLine();
+                if (effect is VstPlugin vstEffect)
+                {
+                    if (ImGui.Button($"{FontAwesome6.ScrewdriverWrench}##{effect.PluginId}"))
+                    {
+                        vstEffect.OpenPluginWindow();
+                    }
+                }
+                ImGui.SameLine();
+                if (ImGui.ArrowButton($"move_up{effect.PluginId}", ImGuiDir.Up))
+                {
+                    int pluginIndex = VstPlayer.PluginsChain.FxPlugins.IndexOf(effect);
+                    int otherIndex = pluginIndex - 1;
+                    if (otherIndex >= 0)
+                    {
+                        VstPlayer.PluginsChain.SwapFxPlugins(pluginIndex, otherIndex);
+                    }
+                }
+                ImGui.SameLine();
+                if (ImGui.ArrowButton($"move_down{effect.PluginId}", ImGuiDir.Down))
+                {
+                    int pluginIndex = VstPlayer.PluginsChain.FxPlugins.IndexOf(effect);
+                    int otherIndex = pluginIndex + 1;
+                    if (otherIndex < VstPlayer.PluginsChain.FxPlugins.Count)
+                    {
+                        VstPlayer.PluginsChain.SwapFxPlugins(pluginIndex, otherIndex);
+                    }
+                }
+                ImGui.SameLine();
+                ImGuiTheme.PushButton(new Vector4(0.8f, 0, 0.2f, 1), new Vector4(0.7f, 0, 0.2f, 1), new Vector4(1, 0, 0.2f, 1));
+                if (ImGui.Button($"{FontAwesome6.PlugCircleXmark}##remove_plugin{effect.PluginId}"))
+                {
+                    VstPlayer.PluginsChain.RemovePlugin(effect);
+                    if (effect is VstPlugin plug)
+                    {
+                        var path = plug.PluginContext.Find<string>("PluginPath");
+                        PluginsPathManager.EffectsPath.Remove(path);
+                    }
+                }
+                ImGuiTheme.PopButton();
+                ImGui.BeginDisabled();
+                ImGui.Spacing();
+            }
+        }
+        ImGui.EndDisabled();
+
+        ImGui.Spacing();
+
+        ImGui.BeginDisabled(CoreSettings.SoundEngine != Enums.SoundEngine.Plugins);
+        if (ImGui.Button($"Add Effect##plugin_effect"))
+        {
+            var dialog = new OpenFileDialog()
+            {
+                Title = "Select a VST2 plugin effect",
+                Filter = "vst plugin (*.dll)|*.dll"
+            };
+            dialog.ShowOpenFileDialog();
+
+            if (dialog.Success)
+            {
+                var file = new FileInfo(dialog.Files.First());
+                var plugin = new VstPlugin(file.FullName);
+                if (plugin.PluginType == PluginType.Instrument)
+                {
+                    plugin.Dispose();
+                    User32.MessageBox(IntPtr.Zero, "Plugin is not an effect.", "Error Loading Plugin",
+                        User32.MB_FLAGS.MB_ICONERROR | User32.MB_FLAGS.MB_TOPMOST);
+                }
+                else
+                {
+                    VstPlayer.PluginsChain.AddPlugin(plugin);
+                    PluginsPathManager.EffectsPath.Add(file.FullName);
+                }
+            }
+        }
+        ImGui.EndDisabled();
+
+        ImGui.Dummy(new(50));
+
         // INPUT
         ImGui.Text($"INPUT {FontAwesome6.Keyboard}");
+        ImGui.Spacing();
+
         ImGui.Checkbox("Keyboard input", ref KeyboardInput);
         Drawings.Tooltip("When keyboard input is enabled, mouse input and shortcuts using letters are disabled");
 
         ImGui.Dummy(new(50));
 
+        // VIDEO RECORDING
+        ImGui.Text($"VIDEO RECORDING {FontAwesome6.Video}");
+        ImGui.Spacing();
+
+#if !SUPPORTER
+        ImGui.TextColored(new Vector4(1, 0, 0.4f, 1), "Video recording is limited at 30sec. Get the SUPPORTER EDITION for unlimited recording.");
+#endif
+        ImGui.Dummy(new(10));
+
+        ImGui.Checkbox("Auto Start Playback", ref VideoRecStartsPlayback);
+        ImGui.SetItemTooltip("When turned on, midi playback will automatically start when a video record is fired.");
+        ImGui.SameLine();
+        ImGui.Checkbox("Open Destination Folder", ref VideoRecOpenDestFolder);
+        ImGui.SetItemTooltip("When turned on, the destination folder of the recorded video clip will be opened on record stop.");
+        ImGui.SameLine();
+        ImGui.Checkbox("Auto Play", ref VideoRecAutoPlay);
+        ImGui.SetItemTooltip("When turned on, the recorded video clip will be played using your default video player on record stop.");
+
+        ImGui.Dummy(new(10));
+
+        int[] framerates = { 30, 60, 120 };
+        if (ImGui.BeginCombo("Recording Framerate", $"{VideoRecFramerate} FPS"))
+        {
+            foreach (var framerate in framerates)
+            {
+                if (ImGui.Selectable($"{framerate} FPS", framerate == VideoRecFramerate))
+                {
+                    SetVideoRecFramerate(framerate);
+                }
+            }
+            ImGui.EndCombo();
+        }
+        ImGui.SetItemTooltip("Framerate of the recording.\nUse 30 or 60 if you aim to share the video on platforms like YouTube.");
+
+        ImGui.Dummy(new(10));
+
+        ImGui.BeginDisabled();
+        ImGui.InputText("Destination Folder", ref VideoRecDestFolder, 10000, ImGuiInputTextFlags.ReadOnly);
+        ImGui.EndDisabled();
+        ImGui.SetItemTooltip("Folder where video recordings will be saved.");
+
+        ImGui.SameLine();
+        if (ImGui.Button($"Change {FontAwesome6.FolderClosed}##video_rec_path"))
+        {
+            var dlg = new FolderPicker();
+            dlg.InputPath = "C:\\";
+            if (dlg.ShowDialog(Program._window.Handle) == true)
+            {
+                SetVideoRecDestFolder(dlg.ResultPath);
+            }
+        }
+
+        ImGui.Dummy(new(50));
+
+        // LOOK AND FEEL
         ImGui.Text($"LOOK AND FEEL {FontAwesome6.Paintbrush}");
+        ImGui.Spacing();
+
         ImGui.SliderInt("Note block roundness", ref NoteRoundness, 0, 15);
 
         ImGui.Dummy(new(10));
