@@ -104,7 +104,10 @@ public static class CoreSettings
 
     public static void SetVideoRecDestFolder(string path)
     {
-        _videoRecDestFolder = path;
+        if (Directory.Exists(path))
+        {
+            _videoRecDestFolder = path;
+        }
     }
 
     public static void SetVideoRecStartsPlayback(bool onoff)

@@ -20,10 +20,6 @@ public static class ProgramData
         Directory.CreateDirectory(Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia"));
         Directory.CreateDirectory(HandsDataPath);
         LoadSettings();
-        if (InputDevice.GetDevicesCount() > 0 && DevicesManager.IDevice == null)
-        {
-            DevicesManager.SetInputDevice(0);
-        }
         ImGuiTheme.PushTheme();
 
         if (CoreSettings.SoundEngine == Enums.SoundEngine.SoundFonts)
@@ -86,10 +82,10 @@ public static class ProgramData
                     DevicesManager.SetOutputDevice(storedSettings.OutputDevice);
                 }
 
-                MidiPathsManager.SetMidiPaths(storedSettings.MidiPaths);
-                SoundFontsPathsManager.SetSoundFontsPaths(storedSettings.SoundFontsPaths);
-                PluginsPathManager.SetInstrumentPath(storedSettings.InstrumentPath);
-                PluginsPathManager.SetEffectsPath(storedSettings.EffectsPath);
+                MidiPathsManager.LoadValidPaths(storedSettings.MidiPaths);             
+                SoundFontsPathsManager.LoadValidPaths(storedSettings.SoundFontsPaths);
+                PluginsPathManager.LoadValidInstrumentPath(storedSettings.InstrumentPath);
+                PluginsPathManager.LoadValidEffectsPath(storedSettings.EffectsPath);
                 CoreSettings.SetKeyboardInput(storedSettings.KeyboardInput);
                 CoreSettings.SetAnimatedBackground(storedSettings.AnimatedBackground);
                 CoreSettings.SetNeonFx(storedSettings.NeonFx);

@@ -11,11 +11,12 @@ public static class MidiPathsManager
         KnownFolders.Music.Path,
     };
 
-    public static void SetMidiPaths(List<string> paths)
+    public static void LoadValidPaths(List<string> paths)
     {
-        if (paths.Count == 0)
-            return;
-
-        MidiPaths = paths;
+        foreach (var folderPath in paths)
+        {
+            if (Directory.Exists(folderPath) && !MidiPaths.Contains(folderPath))
+                MidiPaths.Add(folderPath);
+        }
     }
 }

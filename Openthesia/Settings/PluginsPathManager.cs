@@ -11,16 +11,18 @@ public static class PluginsPathManager
     public static string InstrumentPath { get; private set; } = string.Empty;
     public static List<string> EffectsPath { get; private set; } = new();
 
-    public static void SetInstrumentPath(string instrumentPath)
+    public static void LoadValidInstrumentPath(string instrumentPath)
     {
-        InstrumentPath = instrumentPath;
+        if (File.Exists(instrumentPath) && Path.GetExtension(instrumentPath) == ".dll")
+            InstrumentPath = instrumentPath;
     }
 
-    public static void SetEffectsPath(List<string> paths)
+    public static void LoadValidEffectsPath(List<string> paths)
     {
-        if (paths.Count == 0)
-            return;
-
-        EffectsPath = paths;
+        foreach (var filePath in paths)
+        {
+            if (File.Exists(filePath) && Path.GetExtension(filePath) == ".dll" && !EffectsPath.Contains(filePath))
+                EffectsPath.Add(filePath);
+        }
     }
 }
