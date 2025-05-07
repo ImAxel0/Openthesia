@@ -29,7 +29,7 @@ public static class CoreSettings
     private static int _waveOutLatency = 75;
     public static ref int WaveOutLatency => ref _waveOutLatency;
 
-    private static SoundEngine _soundEngine = SoundEngine.Plugins;
+    private static SoundEngine _soundEngine = SoundEngine.None;
     public static ref SoundEngine SoundEngine => ref _soundEngine;
 
     private static bool _openPluginAtStart;
