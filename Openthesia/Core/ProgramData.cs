@@ -20,10 +20,6 @@ public static class ProgramData
         Directory.CreateDirectory(Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia"));
         Directory.CreateDirectory(HandsDataPath);
         LoadSettings();
-        if (InputDevice.GetDevicesCount() > 0 && DevicesManager.IDevice == null)
-        {
-            DevicesManager.SetInputDevice(0);
-        }
         ImGuiTheme.PushTheme();
 
         if (CoreSettings.SoundEngine == Enums.SoundEngine.SoundFonts)
