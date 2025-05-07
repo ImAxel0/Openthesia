@@ -13,7 +13,7 @@ public static class PluginsPathManager
 
     public static void LoadValidInstrumentPath(string instrumentPath)
     {
-        if (File.Exists(instrumentPath))
+        if (File.Exists(instrumentPath) && Path.GetExtension(instrumentPath) == ".dll")
             InstrumentPath = instrumentPath;
     }
 
@@ -21,7 +21,7 @@ public static class PluginsPathManager
     {
         foreach (var filePath in paths)
         {
-            if (File.Exists(filePath) && !EffectsPath.Contains(filePath))
+            if (File.Exists(filePath) && Path.GetExtension(filePath) == ".dll" && !EffectsPath.Contains(filePath))
                 EffectsPath.Add(filePath);
         }
     }
