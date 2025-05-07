@@ -7,11 +7,12 @@ public static class SoundFontsPathsManager
         Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "SoundFonts"),
     };
 
-    public static void SetSoundFontsPaths(List<string> paths)
+    public static void LoadValidPaths(List<string> paths)
     {
-        if (paths.Count == 0)
-            return;
-
-        SoundFontsPaths = paths;
+        foreach (var folderPath in paths)
+        {
+            if (Directory.Exists(folderPath) && !SoundFontsPaths.Contains(folderPath))
+                SoundFontsPaths.Add(folderPath);
+        }
     }
 }

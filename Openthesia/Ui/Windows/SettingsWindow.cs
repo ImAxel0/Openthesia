@@ -419,7 +419,7 @@ public class SettingsWindow : ImGuiWindow
                 else
                 {
                     VstPlayer.PluginsChain.AddPlugin(plugin);
-                    PluginsPathManager.SetInstrumentPath(file.FullName);
+                    PluginsPathManager.LoadValidInstrumentPath(file.FullName);
                 }
             }
         }
