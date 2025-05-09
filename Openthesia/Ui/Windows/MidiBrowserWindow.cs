@@ -36,6 +36,8 @@ public class MidiBrowserWindow : ImGuiWindow
 
     private void RenderBrowser()
     {
+        Drawings.RenderMatrixBackground();
+
         // browser theme
         ImGui.PushStyleColor(ImGuiCol.ChildBg, ThemeManager.MainBgCol * 0.8f);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImGuiUtils.FixedSize(new Vector2(10)));
