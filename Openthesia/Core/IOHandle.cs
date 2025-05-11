@@ -87,14 +87,14 @@ public static class IOHandle
     private static void OnNoteOn(NoteOnEvent ev)
     {
         SevenBitNumber velocity = ev.Velocity;
-        if (velocity > 0) // TODO: could become a setting
+        if (CoreSettings.VelocityZeroIsNoteOff && velocity == 0)
         {
-            bool isBlack = ev.GetNoteName().ToString().EndsWith("Sharp");
-            OnKeyPressed(ev.NoteNumber, velocity, isBlack);
+            OnKeyReleased(ev.NoteNumber);
         }
         else
         {
-            OnKeyReleased(ev.NoteNumber);
+            bool isBlack = ev.GetNoteName().ToString().EndsWith("Sharp");
+            OnKeyPressed(ev.NoteNumber, velocity, isBlack);
         }
     }
 

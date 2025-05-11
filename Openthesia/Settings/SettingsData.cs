@@ -14,6 +14,7 @@ public class SettingsData
     public List<string> EffectsPath = new();
 
     public bool KeyboardInput;
+    public bool VelocityZeroIsNoteOff;
     public bool AnimatedBackground;
     public bool NeonFx;
     public bool KeyPressColorMatch;
