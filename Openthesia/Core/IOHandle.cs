@@ -1,4 +1,5 @@
-﻿using Melanchall.DryWetMidi.Core;
+﻿using Melanchall.DryWetMidi.Common;
+using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using Openthesia.Core.Midi;
 using Openthesia.Core.Plugins;
@@ -29,22 +30,20 @@ public static class IOHandle
         public float FinalTime;
     }
 
-    private static void OnKeyPress(NoteEvent ev)
+    private static void OnKeyPressed(SevenBitNumber noteNumber, SevenBitNumber velocity, bool isBlack)
     {
         // Check if sustain pedal is active
         if (_sustainPedalActive)
         {
             // add to sustained notes
-            _sustainedNotes.Add(ev.NoteNumber);
+            _sustainedNotes.Add(noteNumber);
         }
 
         if (WindowsManager.Window == Enums.Windows.PlayMode)
         {
-            bool isBlack = ev.GetNoteName().ToString().EndsWith("Sharp");
-
             var note = new NoteRect()
             {
-                KeyNum = ev.NoteNumber,
+                KeyNum = noteNumber,
                 IsBlack = isBlack,
                 PY1 = PianoRenderer.P.Y,
                 PY2 = PianoRenderer.P.Y,
@@ -53,36 +52,55 @@ public static class IOHandle
             NoteRects.Add(note);
         }
 
-        MidiPlayer.SoundFontEngine?.PlayNote(0, ev.NoteNumber, ev.Velocity);
-        PressedKeys.Add(ev.NoteNumber);
+        MidiPlayer.SoundFontEngine?.PlayNote(0, noteNumber, velocity);
+        PressedKeys.Add(noteNumber);
     }
 
-    private static void OnKeyRelease(NoteEvent ev)
+    private static void OnKeyReleased(SevenBitNumber noteNumber)
     {
         if (_sustainPedalActive)
         {
             // If sustain pedal is active, don't stop the note immediately
-            _sustainedNotes.Add(ev.NoteNumber);
+            _sustainedNotes.Add(noteNumber);
         }
         else
         {
             // If sustain pedal is not active, stop the note immediately
-            //MidiPlayer.RealTimeSoundFontPlayer.Synthesizer.ProcessMidiMessage(0, 128, ev.NoteNumber, ev.Velocity);
-            MidiPlayer.SoundFontEngine?.StopNote(0, ev.NoteNumber);
+            //MidiPlayer.RealTimeSoundFontPlayer.Synthesizer.ProcessMidiMessage(0, 128, noteNumber, ev.Velocity);
+            MidiPlayer.SoundFontEngine?.StopNote(0, noteNumber);
         }
 
         if (WindowsManager.Window == Enums.Windows.PlayMode)
         {
-            int index = NoteRects.FindIndex(x => x.KeyNum == ev.NoteNumber && !x.WasReleased);
+            int index = NoteRects.FindIndex(x => x.KeyNum == noteNumber && !x.WasReleased);
             var n = NoteRects[index];
-            //var n = NoteRects.Find(x => x.KeyNum == ev.NoteNumber && !x.WasReleased);
+            //var n = NoteRects.Find(x => x.KeyNum == noteNumber && !x.WasReleased);
             //var n = NoteRects[NoteRects.Count - 1];
             n.WasReleased = true;
             n.FinalTime = n.Time;
             NoteRects[index] = n;
         }
 
-        PressedKeys.Remove(ev.NoteNumber);
+        PressedKeys.Remove(noteNumber);
+    }
+
+    private static void OnNoteOn(NoteOnEvent ev)
+    {
+        SevenBitNumber velocity = ev.Velocity;
+        if (velocity > 0) // TODO: could become a setting
+        {
+            bool isBlack = ev.GetNoteName().ToString().EndsWith("Sharp");
+            OnKeyPressed(ev.NoteNumber, velocity, isBlack);
+        }
+        else
+        {
+            OnKeyReleased(ev.NoteNumber);
+        }
+    }
+
+    private static void OnNoteOff(NoteOffEvent ev)
+    {
+        OnKeyReleased(ev.NoteNumber);
     }
 
     private static void OnSustainPedalOn()
@@ -113,14 +131,10 @@ public static class IOHandle
         switch (eType)
         {
             case MidiEventType.NoteOn:
-                NoteOnEvent noteOnEvent = (NoteOnEvent)e.Event;
-                if (noteOnEvent.Velocity == 0)
-                    OnKeyRelease(noteOnEvent);
-                else
-                    OnKeyPress(noteOnEvent);
+                OnNoteOn((NoteOnEvent)e.Event);
                 break;
             case MidiEventType.NoteOff:
-                OnKeyRelease((NoteOffEvent)e.Event);
+                OnNoteOff((NoteOffEvent)e.Event);
                 break;
             case MidiEventType.ControlChange:
                 var controlChangeEvent = (ControlChangeEvent)e.Event;
@@ -155,14 +169,10 @@ public static class IOHandle
         switch (eType)
         {
             case MidiEventType.NoteOn:
-                NoteOnEvent noteOnEvent = (NoteOnEvent)e.Event;
-                if (noteOnEvent.Velocity == 0)
-                    OnKeyRelease(noteOnEvent);
-                else
-                    OnKeyPress(noteOnEvent);
+                OnNoteOn((NoteOnEvent)e.Event);
                 break;
             case MidiEventType.NoteOff:
-                OnKeyRelease((NoteOffEvent)e.Event);
+                OnNoteOff((NoteOffEvent)e.Event);
                 break;
             case MidiEventType.ControlChange:
                 var controlChangeEvent = (ControlChangeEvent)e.Event;
