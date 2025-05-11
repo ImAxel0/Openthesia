@@ -29,7 +29,7 @@ public static class IOHandle
         public float FinalTime;
     }
 
-    private static void OnKeyPress(NoteOnEvent ev)
+    private static void OnKeyPress(NoteEvent ev)
     {
         // Check if sustain pedal is active
         if (_sustainPedalActive)
@@ -57,7 +57,7 @@ public static class IOHandle
         PressedKeys.Add(ev.NoteNumber);
     }
 
-    private static void OnKeyRelease(NoteOffEvent ev)
+    private static void OnKeyRelease(NoteEvent ev)
     {
         if (_sustainPedalActive)
         {
@@ -113,7 +113,11 @@ public static class IOHandle
         switch (eType)
         {
             case MidiEventType.NoteOn:
-                OnKeyPress((NoteOnEvent)e.Event);
+                NoteOnEvent noteOnEvent = (NoteOnEvent)e.Event;
+                if (noteOnEvent.Velocity == 0)
+                    OnKeyRelease(noteOnEvent);
+                else
+                    OnKeyPress(noteOnEvent);
                 break;
             case MidiEventType.NoteOff:
                 OnKeyRelease((NoteOffEvent)e.Event);
@@ -151,7 +155,11 @@ public static class IOHandle
         switch (eType)
         {
             case MidiEventType.NoteOn:
-                OnKeyPress((NoteOnEvent)e.Event);
+                NoteOnEvent noteOnEvent = (NoteOnEvent)e.Event;
+                if (noteOnEvent.Velocity == 0)
+                    OnKeyRelease(noteOnEvent);
+                else
+                    OnKeyPress(noteOnEvent);
                 break;
             case MidiEventType.NoteOff:
                 OnKeyRelease((NoteOffEvent)e.Event);
