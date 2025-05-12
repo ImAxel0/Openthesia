@@ -8,6 +8,9 @@ public static class CoreSettings
     private static bool _keyboardInput;
     public static ref bool KeyboardInput => ref _keyboardInput;
 
+    private static bool _velocityZeroIsNoteOff = true;
+    public static ref bool VelocityZeroIsNoteOff => ref _velocityZeroIsNoteOff;
+
     private static bool _animatedBackground = true;
     public static ref bool AnimatedBackground => ref _animatedBackground;
 
@@ -60,6 +63,11 @@ public static class CoreSettings
     public static void SetKeyboardInput(bool onoff)
     {
         _keyboardInput = onoff;
+    }
+
+    public static void SetVelocityZeroIsNoteOff(bool onoff)
+    {
+        _velocityZeroIsNoteOff = onoff;
     }
 
     public static void SetAnimatedBackground(bool onoff)
