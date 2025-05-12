@@ -81,6 +81,9 @@ public class SettingsWindow : ImGuiWindow
             ImGui.EndCombo();
         }
 
+        ImGui.SameLine();
+        ImGui.Checkbox("Velocity 0 is Note-Off", ref VelocityZeroIsNoteOff);
+
         if (InputDevice.GetDevicesCount() <= 0)
             ImGui.EndDisabled();
 
@@ -230,7 +233,7 @@ public class SettingsWindow : ImGuiWindow
                         SetAudioDriverType(driver);
 
                         User32.MessageBox(IntPtr.Zero, "A restart of the application is required.\n" +
-                            "The app will automatically close after closing this window.", "Info", 
+                            "The app will automatically close after closing this window.", "Info",
                             User32.MB_FLAGS.MB_TOPMOST | User32.MB_FLAGS.MB_ICONINFORMATION);
 
                         Application.AppInstance.Quit();
@@ -413,7 +416,7 @@ public class SettingsWindow : ImGuiWindow
                 if (plugin.PluginType != PluginType.Instrument)
                 {
                     plugin.Dispose();
-                    User32.MessageBox(IntPtr.Zero, "Plugin is not an instrument.", "Error Loading Plugin", 
+                    User32.MessageBox(IntPtr.Zero, "Plugin is not an instrument.", "Error Loading Plugin",
                         User32.MB_FLAGS.MB_ICONERROR | User32.MB_FLAGS.MB_TOPMOST);
                 }
                 else

@@ -82,11 +82,12 @@ public static class ProgramData
                     DevicesManager.SetOutputDevice(storedSettings.OutputDevice);
                 }
 
-                MidiPathsManager.LoadValidPaths(storedSettings.MidiPaths);             
+                MidiPathsManager.LoadValidPaths(storedSettings.MidiPaths);
                 SoundFontsPathsManager.LoadValidPaths(storedSettings.SoundFontsPaths);
                 PluginsPathManager.LoadValidInstrumentPath(storedSettings.InstrumentPath);
                 PluginsPathManager.LoadValidEffectsPath(storedSettings.EffectsPath);
                 CoreSettings.SetKeyboardInput(storedSettings.KeyboardInput);
+                CoreSettings.SetVelocityZeroIsNoteOff(storedSettings.VelocityZeroIsNoteOff);
                 CoreSettings.SetAnimatedBackground(storedSettings.AnimatedBackground);
                 CoreSettings.SetNeonFx(storedSettings.NeonFx);
                 CoreSettings.SetKeyPressColorMatch(storedSettings.KeyPressColorMatch);
@@ -105,8 +106,8 @@ public static class ProgramData
                 CoreSettings.SetSoundFontLatency(storedSettings.WaveOutLatency < 15 ? CoreSettings.WaveOutLatency : storedSettings.WaveOutLatency);
                 AudioDriverManager.SetAudioDriverType(storedSettings.AudioDriverType);
                 AudioDriverManager.SetAsioDriverDevice(storedSettings.SelectedAsioDriverName);
-                CoreSettings.SetVideoRecDestFolder(string.IsNullOrEmpty(storedSettings.VideoRecDestFolder) 
-                    ? KnownFolders.Videos.Path 
+                CoreSettings.SetVideoRecDestFolder(string.IsNullOrEmpty(storedSettings.VideoRecDestFolder)
+                    ? KnownFolders.Videos.Path
                     : storedSettings.VideoRecDestFolder);
                 CoreSettings.SetVideoRecOpenDestFolder(storedSettings.VideoRecOpenDestFolder);
                 CoreSettings.SetVideoRecStartsPlayback(storedSettings.VideoRecStartsPlayback);
@@ -157,6 +158,7 @@ public static class ProgramData
             InstrumentPath = PluginsPathManager.InstrumentPath,
             EffectsPath = PluginsPathManager.EffectsPath,
             KeyboardInput = CoreSettings.KeyboardInput,
+            VelocityZeroIsNoteOff = CoreSettings.VelocityZeroIsNoteOff,
             AnimatedBackground = CoreSettings.AnimatedBackground,
             NeonFx = CoreSettings.NeonFx,
             KeyPressColorMatch = CoreSettings.KeyPressColorMatch,

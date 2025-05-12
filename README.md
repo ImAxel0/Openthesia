@@ -41,7 +41,18 @@ In the Play mode you can visualize midi inputs as rising note blocks and also re
 
 ## What operating systems does it support? :desktop_computer:
 
-As of now Openthesia is only available on Windows devices, support for other platforms isn't currently planned.
+Openthesia is officially supported on **Windows**.
+
+However, it appears to be working almost flawlessly on **Linux** using [**Wine**](https://www.winehq.org/)!
+If you're a Linux user and willing to experiment, you may still enjoy the full experience, just keep in mind that it's not officially supported or tested.
+
+| Feature       | Windows | Linux (wine) |
+| ---           | ---     | ---          |
+| MIDI Playback | ✅      | ✅          |
+| MIDI Input/Output Devices | ✅ | ✅ |
+| SoundFonts    | ✅      | ✅ |
+| Video Recording | ✅    | ✖️ |
+| VST Plugins   | ✅      | ✅ (may need further testing) |
 
 ## Installation :arrow_down:
 
