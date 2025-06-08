@@ -12,7 +12,8 @@
 
 If you found this project helpful and want to contribute and unlock new features, consider getting the **Supporter Edition**:
 
-[![Openthesia SE](https://img.shields.io/badge/Thank_You-Openthesia_Supporter_Edition-blueviolet?style=for-the-badge)](https://imaxel.gumroad.com/l/openthesia)
+[![Openthesia SE](https://img.shields.io/badge/Gumroad-Openthesia_Supporter_Edition-blueviolet?style=for-the-badge)](https://imaxel.gumroad.com/l/openthesia)
+[![Openthesia SE](https://img.shields.io/badge/itch.io-Openthesia_Supporter_Edition-tomato?style=for-the-badge)](https://imaxel0.itch.io/openthesia)
 
 ---
 
@@ -86,5 +87,3 @@ https://freepats.zenvoid.org/
 - [MeltySynth](https://github.com/sinshu/meltysynth)
 - [VST.NET](https://github.com/obiwanjacobi/vst.net)
 - [Dear ImGui](https://github.com/ocornut/imgui) & [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET)
-
----
