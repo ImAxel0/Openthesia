@@ -742,8 +742,11 @@ public class ScreenCanvas
                 {
                     case RecorderStatus.Idle:
                         ScreenRecorder.StartRecording();
-                        MidiPlayer.Playback.Start();
-                        MidiPlayer.StartTimer();
+                        if (CoreSettings.VideoRecStartsPlayback)
+                        {
+                            MidiPlayer.Playback.Start();
+                            MidiPlayer.StartTimer();
+                        }
                         break;
                     case RecorderStatus.Recording:
                         ScreenRecorder.EndRecording();

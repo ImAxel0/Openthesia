@@ -31,14 +31,38 @@ public class PianoRenderer
         Width = ImGui.GetIO().DisplaySize.X * 1.9f / 100;
         Height = ImGui.GetIO().DisplaySize.Y - ImGui.GetIO().DisplaySize.Y * 76f / 100;
 
-        int cur_key = 21;
+        int cur_key = 22; // Start from first black key since we need to handle black keys mouse input before white ones
+
+        /* Check if a black key is pressed */
+        bool blackKeyClicked = false;
+        for (int key = 0; key < 52; key++)
+        {
+            if (KeysUtils.HasBlack(key))
+            {
+                Vector2 min = new(P.X + key * Width + Width * 3 / 4, P.Y);
+                Vector2 max = new(P.X + key * Width + Width * 5 / 4 + 1, P.Y + Height / 1.5f);
+
+                if (ImGui.IsMouseHoveringRect(min, max) && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                {
+                    blackKeyClicked = true;
+                }
+
+                cur_key += 2;
+            }
+            else
+            {
+                cur_key++;
+            }
+        }
+
+        cur_key = 21;
         int cCount = 1;
         for (int key = 0; key < 52; key++)
         {
             uint col = _white;
 
             if (ImGui.IsMouseHoveringRect(new(P.X + key * Width, P.Y), new(P.X + key * Width + Width, P.Y + Height)) && ImGui.IsMouseClicked(ImGuiMouseButton.Left)
-                && !CoreSettings.KeyboardInput)
+                && !CoreSettings.KeyboardInput && !blackKeyClicked)
             {
                 // on key mouse press
                 IOHandle.OnEventReceived(null,

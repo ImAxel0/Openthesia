@@ -17,27 +17,38 @@ public class Drawings
     public static void RenderMatrixBackground()
     {
         var drawList = ImGui.GetWindowDrawList();
-        var randomW = new Random();
-        var randomH = new Random();
-        var randomL = new Random();
+        var io = ImGui.GetIO();
+        var time = ImGui.GetTime();
+
+        var screenWidth = (int)io.DisplaySize.X;
+        var screenHeight = (int)io.DisplaySize.Y;
+
+        var random = new Random(100);
 
         for (int i = 0; i < 20; i++)
         {
-            int rw = randomW.Next(0, (int)ImGui.GetIO().DisplaySize.X);
-            int rh = randomH.Next(0, (int)ImGui.GetIO().DisplaySize.Y);
-            int rl = randomL.Next(10, 50);
+            int baseX = random.Next(0, screenWidth);
+            int startY = random.Next(0, screenHeight);
+            int length = random.Next(10, 50);
+            float speed = random.Next(250, 500); // pixels/sec
+
+            float y = (startY + (float)(time * speed)) % (screenHeight + length);
 
             if (CoreSettings.NeonFx)
             {
-                // Draw glowing effect
                 for (int j = 0; j < 3; j++)
                 {
                     float thickness = j * 2;
                     float alpha = 0.2f + (3 - j) * 0.2f;
-                    uint color = ImGui.GetColorU32(new Vector4(ThemeManager.RightHandCol.X, ThemeManager.RightHandCol.Y, ThemeManager.RightHandCol.Z, alpha) * 0.5f);
+                    uint color = ImGui.GetColorU32(new Vector4(
+                        ThemeManager.RightHandCol.X,
+                        ThemeManager.RightHandCol.Y,
+                        ThemeManager.RightHandCol.Z,
+                        alpha * 0.5f));
+
                     drawList.AddRect(
-                        new Vector2(rw - 1, rh - 1),
-                        new Vector2(rw + 20 + 1, rh + rl + 1),
+                        new Vector2(baseX - 1, y - 1),
+                        new Vector2(baseX + 20 + 1, y + length + 1),
                         color,
                         5f,
                         0,
@@ -45,7 +56,14 @@ public class Drawings
                     );
                 }
             }
-            drawList.AddRectFilled(new Vector2(rw, rh), new Vector2(rw + 20, rh + rl), ImGui.GetColorU32(ThemeManager.RightHandCol), 5, ImDrawFlags.RoundCornersAll);
+
+            drawList.AddRectFilled(
+                new Vector2(baseX, y),
+                new Vector2(baseX + 20, y + length),
+                ImGui.GetColorU32(ThemeManager.RightHandCol),
+                5,
+                ImDrawFlags.RoundCornersAll
+            );
         }
     }
 
