@@ -39,6 +39,7 @@ public class ScreenCanvas
     private static bool _isHoveringTextBtn;
     private static bool _isProgressBarHovered;
     private static float _panVelocity;
+    private static bool _isProgressBarActive;
 
     private static void RenderGrid()
     {
@@ -259,7 +260,7 @@ public class ScreenCanvas
                     }
                 }
 
-                if (IsEditMode && !_isProgressBarHovered)
+                if (IsEditMode && !_isProgressBarHovered && !_isProgressBarActive)
                 {
                     if (ImGui.GetIO().KeyCtrl && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_isRectMode)
                     {
@@ -364,6 +365,11 @@ public class ScreenCanvas
                             }
                         }
                     }
+                }
+                else
+                {
+                    // Disable rect mode when the progress bar is hovered or active
+                    _isRectMode = false;
                 }
 
                 // skip notes outside of screen to save performance
@@ -677,8 +683,9 @@ public class ScreenCanvas
             MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
             MidiPlayer.Timer = MidiPlayer.Seconds * 100 * FallSpeedVal;
         }
+        _isProgressBarActive = ImGui.IsItemActive();
         _isProgressBarHovered = ImGui.IsItemHovered();
-        if (_isProgressBarHovered && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+        if (_isProgressBarActive && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
         }
