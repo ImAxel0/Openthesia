@@ -193,6 +193,7 @@ public class ScreenCanvas
 
         int index = 0;
         var notes = MidiFileData.Notes;
+        bool missingNote = false;
         foreach (Note note in notes)
         {
             var time = (float)note.TimeAs<MetricTimeSpan>(MidiFileData.TempoMap).TotalSeconds * FallSpeedVal;
@@ -232,16 +233,9 @@ public class ScreenCanvas
                 {
                     if (py2 > PianoRenderer.P.Y - 1.5f && py2 < PianoRenderer.P.Y)
                     {
-                        if (IOHandle.PressedKeys.Contains(note.NoteNumber))
+                        if (!IOHandle.PressedKeys.Contains(note.NoteNumber))
                         {
-                            if (!MidiPlayer.IsTimerRunning)
-                            {
-                                MidiPlayer.StartTimer();
-                                MidiPlayer.Playback.Start();
-                            }
-                        }
-                        else
-                        {
+                            missingNote = true;
                             MidiPlayer.StopTimer();
                             MidiPlayer.Playback.Stop();
 
@@ -480,6 +474,11 @@ public class ScreenCanvas
                 }
             }
             index++;
+        }
+        if (IsLearningMode && !MidiPlayer.IsTimerRunning && !missingNote)
+        {
+            MidiPlayer.StartTimer();
+            MidiPlayer.Playback.Start();
         }
     }
 
