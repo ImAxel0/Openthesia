@@ -105,12 +105,23 @@ public class ModeSelectionWindow : ImGuiWindow
     {
         ScreenCanvasControls.SetLearningMode(learningMode);
         ScreenCanvasControls.SetEditMode(editMode);
+        
         LeftRightData.S_IsRightNote.Clear();
         foreach (var note in MidiFileData.Notes)
         {
             LeftRightData.S_IsRightNote.Add(true);
         }
         MidiEditing.ReadData();
+        
+        // Map the unique hash for each note to its index in the midi file for later reference during midi note playback
+        LeftRightData.S_NoteIndexMap = new Dictionary<string, int>();
+        foreach (var (note, i) in MidiFileData.Notes.Select((note, i) => (note, i)))
+        {
+            // uniquely hash each note with a composite key of its number and absolute time
+            var hash = note.NoteNumber + note.Time.ToString();
+            LeftRightData.S_NoteIndexMap.Add(hash, i);
+        }
+        
         WindowsManager.SetWindow(Enums.Windows.MidiPlayback);
     }
 

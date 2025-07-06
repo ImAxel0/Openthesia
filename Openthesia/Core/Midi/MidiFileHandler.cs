@@ -12,34 +12,8 @@ public static class MidiFileHandler
     public static void LoadMidiFile(string filePath)
     {
         var midiFile = MidiFile.Read(filePath);
-
-        MidiFileData.MidiFile = midiFile;
-        MidiFileData.TempoMap = midiFile.GetTempoMap();
-        MidiFileData.Notes = midiFile.GetNotes();
         MidiFileData.FileName = Path.GetFileName(filePath);
-
-        if (MidiPlayer.Playback != null)
-        {
-            MidiPlayer.Playback.Stop();
-            MidiPlayer.Playback.EventPlayed -= IOHandle.OnEventReceived;
-
-            PlaybackCurrentTimeWatcher.Instance.Stop();
-            PlaybackCurrentTimeWatcher.Instance.CurrentTimeChanged -= MidiPlayer.OnCurrentTimeChanged;
-            PlaybackCurrentTimeWatcher.Instance.RemovePlayback(MidiPlayer.Playback);
-        }
-
-        MidiPlayer.Playback = DevicesManager.ODevice != null
-            ? midiFile.GetPlayback(DevicesManager.ODevice) : midiFile.GetPlayback();
-
-        MidiPlayer.Playback.TrackNotes = true;
-        MidiPlayer.Playback.TrackProgram = true;
-        MidiPlayer.Playback.EventPlayed += IOHandle.OnEventReceived;
-        MidiPlayer.Playback.Finished += MidiPlayer.Playback_Finished;
-
-        PlaybackCurrentTimeWatcher.Instance.AddPlayback(MidiPlayer.Playback, TimeSpanType.Midi);
-        PlaybackCurrentTimeWatcher.Instance.CurrentTimeChanged += MidiPlayer.OnCurrentTimeChanged;
-        PlaybackCurrentTimeWatcher.Instance.Start();
-
+        LoadMidiFile(midiFile);
         Program._window.Title = $"Openthesia ({MidiFileData.FileName})";
     }
 
@@ -68,6 +42,7 @@ public static class MidiFileHandler
         MidiPlayer.Playback.TrackProgram = true;
         MidiPlayer.Playback.EventPlayed += IOHandle.OnEventReceived;
         MidiPlayer.Playback.Finished += MidiPlayer.Playback_Finished;
+        MidiPlayer.Playback.NoteCallback = NoteCallback.HandMutingNoteCallback;
 
         PlaybackCurrentTimeWatcher.Instance.AddPlayback(MidiPlayer.Playback, TimeSpanType.Midi);
         PlaybackCurrentTimeWatcher.Instance.CurrentTimeChanged += MidiPlayer.OnCurrentTimeChanged;

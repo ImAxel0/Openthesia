@@ -68,6 +68,27 @@ public class ScreenCanvas
     {
         return a + (b - a) * t;
     }
+    
+    private static bool IsNoteEnabled(int index)
+    {
+        return LeftRightData.S_IsRightNote[index] && RightHandActive ||
+               !LeftRightData.S_IsRightNote[index] && LeftHandActive;
+    }
+
+    private static Vector4 GetNoteColor(int index)
+    {
+        if (LeftRightData.S_IsRightNote[index])
+        {
+            return RightHandActive ? ThemeManager.RightHandCol : ThemeManager.MainBgCol;
+        }
+        return LeftHandActive ? ThemeManager.LeftHandCol : ThemeManager.MainBgCol;
+    }
+
+    private static uint GetSharpColor(int index)
+    {
+        var color = IsNoteEnabled(index) ? ImGuiUtils.DarkenColor(GetNoteColor(index), 0.4f) : ThemeManager.MainBgCol;
+        return ImGui.GetColorU32(color);
+    }
 
     private static void DrawInputNotes()
     {
@@ -198,8 +219,8 @@ public class ScreenCanvas
         {
             var time = (float)note.TimeAs<MetricTimeSpan>(MidiFileData.TempoMap).TotalSeconds * FallSpeedVal;
             var length = (float)note.LengthAs<MetricTimeSpan>(MidiFileData.TempoMap).TotalSeconds * FallSpeedVal;
-            var col = LeftRightData.S_IsRightNote[index] ? ThemeManager.RightHandCol : ThemeManager.LeftHandCol;
-
+            var col = GetNoteColor(index);
+            
             // color opacity based on note velocity
             if (CoreSettings.UseVelocityAsNoteOpacity)
             {
@@ -233,7 +254,7 @@ public class ScreenCanvas
                 {
                     if (py2 > PianoRenderer.P.Y - 1.5f && py2 < PianoRenderer.P.Y)
                     {
-                        if (!IOHandle.PressedKeys.Contains(note.NoteNumber))
+                        if (IsNoteEnabled(index) && !IOHandle.PressedKeys.Contains(note.NoteNumber))
                         {
                             missingNote = true;
                             MidiPlayer.StopTimer();
@@ -408,7 +429,7 @@ public class ScreenCanvas
 
                 drawList.AddRectFilled(new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4, py1),
                       new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4, py2),
-                      ImGui.GetColorU32(col * 0.7f), CoreSettings.NoteRoundness, ImDrawFlags.RoundCornersAll);
+                      GetSharpColor(index), CoreSettings.NoteRoundness, ImDrawFlags.RoundCornersAll);
 
                 if (ShowTextNotes)
                 {
@@ -896,6 +917,26 @@ public class ScreenCanvas
         }
     }
 
+    private static void DrawHandToggleButtons()
+    {
+        ImGui.PushFont(FontController.Font16_Icon16);
+        ImGui.SetCursorScreenPos(new(ImGuiUtils.FixedSize(new Vector2(160)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(110)).Y));
+        ImGui.PushStyleColor(ImGuiCol.Button, LeftHandActive ? ImGuiTheme.Button : ImGuiTheme.DarkButton);
+        if (ImGui.Button("L", ImGuiUtils.FixedSize(new Vector2(25, 35))))
+        {
+            LeftHandActive = !LeftHandActive;
+        }
+        ImGui.PopStyleColor();
+        ImGui.SetCursorScreenPos(new(ImGuiUtils.FixedSize(new Vector2(190)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(110)).Y));
+        ImGui.PushStyleColor(ImGuiCol.Button, RightHandActive ? ImGuiTheme.Button : ImGuiTheme.DarkButton);
+        if (ImGui.Button("R", ImGuiUtils.FixedSize(new Vector2(25, 35))))
+        {
+            RightHandActive = !RightHandActive;
+        }
+        ImGui.PopStyleColor();
+        ImGui.PopFont();
+    }
+
     private static void DrawSharedControls(bool showTopBar, bool playMode)
     {
         if (!showTopBar && !LockTopBar)
@@ -942,6 +983,11 @@ public class ScreenCanvas
             | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
 
         _rightHandColorPicker = ImGui.IsPopupOpen("Right Hand Colorpicker");
+
+        if (!playMode)
+        {
+            DrawHandToggleButtons();
+        }
 
         if (CoreSettings.SoundEngine == SoundEngine.SoundFonts)
         {
