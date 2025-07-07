@@ -438,9 +438,9 @@ public class ScreenCanvas
                     
                     if (TextType == TextTypes.NoteName)
                         noteInfo = noteInfo.Replace("Sharp", "#");
-
-                    var pos = new Vector2(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4,
-                        py2 - length * 100 / 2 - ImGui.CalcTextSize(noteInfo).Y / 2);
+                    var textSize = ImGui.CalcTextSize(noteInfo) / 2;
+                    var pos = new Vector2(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width - textSize.X + 1,
+                        py2 - length * 100 / 2 - textSize.Y);
 
                     drawList.AddText(pos + new Vector2(1), ImGui.GetColorU32(new Vector4(0, 0, 0, 1)), noteInfo);
                     drawList.AddText(pos, ImGui.GetColorU32(Vector4.One), noteInfo);
