@@ -16,6 +16,9 @@ public static class ScreenCanvasControls
     public static bool ShowTextNotes => _showTextNotes;
     public static bool IsLearningMode => _isLearningMode;
     public static bool IsEditMode => _isEditMode;
+    public static bool LeftHandActive { get; set; } = true;
+
+    public static bool RightHandActive { get; set; } = true;
 
 
     private static float _fallSpeedVal = 2f;
