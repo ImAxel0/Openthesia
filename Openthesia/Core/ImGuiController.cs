@@ -80,7 +80,8 @@ public class ImGuiController : IDisposable
         GCHandle pinnedArray = GCHandle.Alloc(fontData, GCHandleType.Pinned);
         IntPtr pointer = pinnedArray.AddrOfPinnedObject();
 
-        float dpiScaleFactor = User32.GetDpiForWindow(Program._window.Handle) / 96.0f;
+        // DPI scaling > 200% causes font sizes that are too big for the device texture
+        float dpiScaleFactor = Math.Min(2.0f, User32.GetDpiForWindow(Program._window.Handle) / 96.0f);
         FontController.DSF = dpiScaleFactor;
 
         FontController.Font16_Icon12 = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pointer, fontData.Length, 16 * dpiScaleFactor);
