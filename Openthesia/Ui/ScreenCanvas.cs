@@ -725,8 +725,8 @@ public class ScreenCanvas
 
     private static void DrawPlaybackControls()
     {
-        ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X / 2 - ImGuiUtils.FixedSize(new Vector2(112)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(50)).Y));
-        if (ImGui.BeginChild("Player controls", ImGuiUtils.FixedSize(new Vector2(224, 50)), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X / 2 - ImGuiUtils.FixedSize(new Vector2(110)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(50)).Y));
+        if (ImGui.BeginChild("Player controls", ImGuiUtils.FixedSize(new Vector2(220, 50)), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
             var playColor = !MidiPlayer.IsTimerRunning ? Vector4.One : ThemeManager.RightHandCol;
 
@@ -1087,9 +1087,11 @@ public class ScreenCanvas
         }
 
         // SUSTAIN PEDAL BUTTON
-        ImGui.SetCursorPos(new Vector2(ImGui.GetIO().DisplaySize.X - ImGuiUtils.FixedSize(new Vector2(75)).X, ImGui.GetWindowSize().Y - ImGuiUtils.FixedSize(new Vector2(60)).Y));
-        if (ImGui.ImageButton("SustainBtn", IOHandle.SustainPedalActive ? Drawings.SustainPedalOn : Drawings.SustainPedalOff,
-            new Vector2(50)))
+        // ImageButton padding according to https://github.com/ocornut/imgui/issues/6901#issuecomment-1749178625
+        var imagePadding = ImGui.GetStyle().FramePadding * 2.0f;
+        ImGui.SetCursorPos(ImGui.GetWindowSize() - ImGuiUtils.FixedSize(new Vector2(65) + imagePadding));
+        if (ImGui.ImageButton("SustainBtn", IOHandle.SustainPedalActive ? Drawings.SustainPedalOn : Drawings.SustainPedalOff, 
+                ImGuiUtils.FixedSize(new Vector2(50))))
         {
             IOHandle.OnEventReceived(null, new Melanchall.DryWetMidi.Multimedia.MidiEventReceivedEventArgs(
                 new ControlChangeEvent(ControlUtilities.AsSevenBitNumber(ControlName.DamperPedal),
@@ -1100,8 +1102,8 @@ public class ScreenCanvas
 
     private static void DrawPlayModeControls()
     {
-        ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X / 2 - ImGuiUtils.FixedSize(new Vector2(112)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(50)).Y));
-        if (ImGui.BeginChild("Player controls", ImGuiUtils.FixedSize(new Vector2(224, 50)), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        ImGui.SetNextWindowPos(new Vector2(ImGui.GetIO().DisplaySize.X / 2 - ImGuiUtils.FixedSize(new Vector2(110)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(50)).Y));
+        if (ImGui.BeginChild("Player controls", ImGuiUtils.FixedSize(new Vector2(220, 50)), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
             var recordColor = MidiRecording.IsRecording() ? new Vector4(1, 0, 0, 1) : Vector4.One;
 
