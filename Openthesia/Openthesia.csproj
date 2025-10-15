@@ -8,28 +8,12 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ApplicationIcon>logo.ico</ApplicationIcon>
     <Platforms>AnyCPU;x64</Platforms>
-    <Configurations>Debug;Release;SupporterDebug;SupporterRelease</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterDebug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterDebug|x64'">
-    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterRelease|AnyCPU'">
-    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterRelease|x64'">
-    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
-  </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
 

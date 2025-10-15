@@ -187,12 +187,7 @@ public class SettingsWindow : ImGuiWindow
         {
             foreach (var engine in Enum.GetValues<SoundEngine>())
             {
-                bool enabled = true;
-#if !SUPPORTER
-                if (engine == Enums.SoundEngine.Plugins)
-                    enabled = false;
-#endif
-                if (ImGui.Selectable(engine.ToString(), engine == CoreSettings.SoundEngine, enabled ? ImGuiSelectableFlags.None : ImGuiSelectableFlags.Disabled))
+                if (ImGui.Selectable(engine.ToString(), engine == CoreSettings.SoundEngine))
                 {
                     SetSoundEngine(engine);
 
@@ -370,9 +365,6 @@ public class SettingsWindow : ImGuiWindow
         ImGui.Text($"PLUGINS (VST) {FontAwesome6.Plug}");
         ImGui.Spacing();
 
-#if !SUPPORTER
-        ImGui.TextColored(new Vector4(1, 0, 0.4f, 1), "Plugins are disabled. Get the SUPPORTER EDITION to start using them.");
-#endif
         ImGui.Dummy(new(10));
 
         ImGui.Checkbox("Open plugins at startup", ref OpenPluginAtStart);
@@ -549,9 +541,6 @@ public class SettingsWindow : ImGuiWindow
         ImGui.Text($"VIDEO RECORDING {FontAwesome6.Video}");
         ImGui.Spacing();
 
-#if !SUPPORTER
-        ImGui.TextColored(new Vector4(1, 0, 0.4f, 1), "Video recording is limited at 30sec. Get the SUPPORTER EDITION for unlimited recording.");
-#endif
         ImGui.Dummy(new(10));
 
         ImGui.Checkbox("Auto Start Playback", ref VideoRecStartsPlayback);

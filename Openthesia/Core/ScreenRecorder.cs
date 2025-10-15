@@ -16,8 +16,6 @@ public static class ScreenRecorder
     public static Recorder Recording { get; private set; }
     public static RecorderStatus Status { get; private set; }
 
-    private static Stopwatch _timer = new();
-
     public static void StartRecording()
     {
         string fileName = MidiFileData.FileName.Replace(".mid", string.Empty);
@@ -52,26 +50,11 @@ public static class ScreenRecorder
 
         //Record to a file
         Recording.Record(videoPath);
-
-#if !SUPPORTER
-        _timer.Restart();
-        Task.Run(() =>
-        {
-            while (_timer.IsRunning)
-            {
-                if (_timer.Elapsed.TotalSeconds >= 30)
-                {
-                    EndRecording();
-                }
-            }
-        });
-#endif
     }
 
     public static void EndRecording()
     {
         Recording.Stop();
-        _timer.Reset();
     }
 
     private static void OnRecordingComplete(object sender, RecordingCompleteEventArgs e)
@@ -89,7 +72,6 @@ public static class ScreenRecorder
 
     private static void OnRecordingFailed(object sender, RecordingFailedEventArgs e)
     {
-        _timer.Reset();
         User32.MessageBox(IntPtr.Zero, e.Error, "Recording Failed", 
             User32.MB_FLAGS.MB_ICONERROR | User32.MB_FLAGS.MB_TOPMOST);
     }
