@@ -10,10 +10,7 @@
 
 ### :star2: If you really enjoy the app consider starring the repo :star2:
 
-If you found this project helpful and want to contribute and unlock new features, consider getting the **Supporter Edition**:
-
-[![Openthesia SE](https://img.shields.io/badge/Gumroad-Openthesia_Supporter_Edition-blueviolet?style=for-the-badge)](https://imaxel.gumroad.com/l/openthesia)
-[![Openthesia SE](https://img.shields.io/badge/itch.io-Openthesia_Supporter_Edition-tomato?style=for-the-badge)](https://imaxel0.itch.io/openthesia)
+<ins>As I don't have enough time to actively continue the development of the project, the **Supporter Edition** will be removed starting from the next release and all features will become available to all users. A special thank to those few who supported it.</ins>
 
 ---
 
@@ -35,10 +32,8 @@ In the Play mode you can visualize midi inputs as rising note blocks and also re
 - **Play mode**: visualize midi input realtime and record it to export it as a midi file
 - **Hands separation**: differentiate between left and right hand with colors
 - **SoundFonts support**: built-in and external sounds support through .sf2 files
-- **Video recording**\*: capture video of your MIDI playbacks or performances and export them directly.
-- **Plugins support**\*: use your favorite VST2 instruments and audio effects directly inside Openthesia!
-
-\*Available with [Openthesia Supporter Edition](https://openthesia.pages.dev/supporter).
+- **Video recording**: capture video of your MIDI playbacks or performances and export them directly.
+- **Plugins support**: use your favorite VST2 instruments and audio effects directly inside Openthesia!
 
 ## What operating systems does it support? :desktop_computer:
 
