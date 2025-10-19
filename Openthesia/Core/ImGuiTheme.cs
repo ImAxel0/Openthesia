@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Openthesia.Settings;
 using System.Numerics;
+using Openthesia.Ui.Helpers;
 
 namespace Openthesia.Core;
 
@@ -10,6 +11,7 @@ public static class ImGuiTheme
     public static Vector4 Button = new Vector4(0.29f, 0.29f, 0.29f, .9f);
     public static Vector4 ButtonHovered = new Vector4(0.29f, 0.29f, 0.29f, .9f) * 1.2f;
     public static Vector4 ButtonActive = new Vector4(0.29f, 0.29f, 0.29f, .9f) * 1.5f;
+    public static Vector4 DarkButton = ImGuiUtils.DarkenColor(Button, 0.5f);
 
     public static Vector4 HtmlToVec4(string htmlColor, float alpha = 1f)
     {

@@ -39,6 +39,7 @@ public class ScreenCanvas
     private static bool _isHoveringTextBtn;
     private static bool _isProgressBarHovered;
     private static float _panVelocity;
+    private static bool _isProgressBarActive;
 
     private static void RenderGrid()
     {
@@ -66,6 +67,27 @@ public class ScreenCanvas
     private static float Lerp(float a, float b, float t)
     {
         return a + (b - a) * t;
+    }
+    
+    private static bool IsNoteEnabled(int index)
+    {
+        return LeftRightData.S_IsRightNote[index] && RightHandActive ||
+               !LeftRightData.S_IsRightNote[index] && LeftHandActive;
+    }
+
+    private static Vector4 GetNoteColor(int index)
+    {
+        if (LeftRightData.S_IsRightNote[index])
+        {
+            return RightHandActive ? ThemeManager.RightHandCol : ThemeManager.MainBgCol;
+        }
+        return LeftHandActive ? ThemeManager.LeftHandCol : ThemeManager.MainBgCol;
+    }
+
+    private static uint GetSharpColor(int index)
+    {
+        var color = IsNoteEnabled(index) ? ImGuiUtils.DarkenColor(GetNoteColor(index), 0.4f) : ThemeManager.MainBgCol;
+        return ImGui.GetColorU32(color);
     }
 
     private static void DrawInputNotes()
@@ -192,12 +214,13 @@ public class ScreenCanvas
 
         int index = 0;
         var notes = MidiFileData.Notes;
+        bool missingNote = false;
         foreach (Note note in notes)
         {
             var time = (float)note.TimeAs<MetricTimeSpan>(MidiFileData.TempoMap).TotalSeconds * FallSpeedVal;
             var length = (float)note.LengthAs<MetricTimeSpan>(MidiFileData.TempoMap).TotalSeconds * FallSpeedVal;
-            var col = LeftRightData.S_IsRightNote[index] ? ThemeManager.RightHandCol : ThemeManager.LeftHandCol;
-
+            var col = GetNoteColor(index);
+            
             // color opacity based on note velocity
             if (CoreSettings.UseVelocityAsNoteOpacity)
             {
@@ -231,16 +254,9 @@ public class ScreenCanvas
                 {
                     if (py2 > PianoRenderer.P.Y - 1.5f && py2 < PianoRenderer.P.Y)
                     {
-                        if (IOHandle.PressedKeys.Contains(note.NoteNumber))
+                        if (IsNoteEnabled(index) && !IOHandle.PressedKeys.Contains(note.NoteNumber))
                         {
-                            if (!MidiPlayer.IsTimerRunning)
-                            {
-                                MidiPlayer.StartTimer();
-                                MidiPlayer.Playback.Start();
-                            }
-                        }
-                        else
-                        {
+                            missingNote = true;
                             MidiPlayer.StopTimer();
                             MidiPlayer.Playback.Stop();
 
@@ -259,7 +275,7 @@ public class ScreenCanvas
                     }
                 }
 
-                if (IsEditMode && !_isProgressBarHovered)
+                if (IsEditMode && !_isProgressBarHovered && !_isProgressBarActive)
                 {
                     if (ImGui.GetIO().KeyCtrl && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !_isRectMode)
                     {
@@ -365,6 +381,11 @@ public class ScreenCanvas
                         }
                     }
                 }
+                else
+                {
+                    // Disable rect mode when the progress bar is hovered or active
+                    _isRectMode = false;
+                }
 
                 // skip notes outside of screen to save performance
                 if (py2 < 0 || py1 > PianoRenderer.P.Y)
@@ -408,7 +429,7 @@ public class ScreenCanvas
 
                 drawList.AddRectFilled(new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4, py1),
                       new(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 5 / 4, py2),
-                      ImGui.GetColorU32(col * 0.7f), CoreSettings.NoteRoundness, ImDrawFlags.RoundCornersAll);
+                      GetSharpColor(index), CoreSettings.NoteRoundness, ImDrawFlags.RoundCornersAll);
 
                 if (ShowTextNotes)
                 {
@@ -417,9 +438,9 @@ public class ScreenCanvas
                     
                     if (TextType == TextTypes.NoteName)
                         noteInfo = noteInfo.Replace("Sharp", "#");
-
-                    var pos = new Vector2(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width * 3 / 4,
-                        py2 - length * 100 / 2 - ImGui.CalcTextSize(noteInfo).Y / 2);
+                    var textSize = ImGui.CalcTextSize(noteInfo) / 2;
+                    var pos = new Vector2(PianoRenderer.P.X + PianoRenderer.BlackNoteToKey.GetValueOrDefault(note.NoteNumber, 0) * PianoRenderer.Width + PianoRenderer.Width - textSize.X + 1,
+                        py2 - length * 100 / 2 - textSize.Y);
 
                     drawList.AddText(pos + new Vector2(1), ImGui.GetColorU32(new Vector4(0, 0, 0, 1)), noteInfo);
                     drawList.AddText(pos, ImGui.GetColorU32(Vector4.One), noteInfo);
@@ -474,6 +495,11 @@ public class ScreenCanvas
                 }
             }
             index++;
+        }
+        if (IsLearningMode && !MidiPlayer.IsTimerRunning && !missingNote)
+        {
+            MidiPlayer.StartTimer();
+            MidiPlayer.Playback.Start();
         }
     }
 
@@ -677,8 +703,9 @@ public class ScreenCanvas
             MidiPlayer.Playback.MoveToTime(new MetricTimeSpan(ms));
             MidiPlayer.Timer = MidiPlayer.Seconds * 100 * FallSpeedVal;
         }
+        _isProgressBarActive = ImGui.IsItemActive();
         _isProgressBarHovered = ImGui.IsItemHovered();
-        if (_isProgressBarHovered && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+        if (_isProgressBarActive && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
         }
@@ -890,6 +917,26 @@ public class ScreenCanvas
         }
     }
 
+    private static void DrawHandToggleButtons()
+    {
+        ImGui.PushFont(FontController.Font16_Icon16);
+        ImGui.SetCursorScreenPos(new(ImGuiUtils.FixedSize(new Vector2(160)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(110)).Y));
+        ImGui.PushStyleColor(ImGuiCol.Button, LeftHandActive ? ImGuiTheme.Button : ImGuiTheme.DarkButton);
+        if (ImGui.Button("L", ImGuiUtils.FixedSize(new Vector2(25, 35))))
+        {
+            LeftHandActive = !LeftHandActive;
+        }
+        ImGui.PopStyleColor();
+        ImGui.SetCursorScreenPos(new(ImGuiUtils.FixedSize(new Vector2(190)).X, CanvasPos.Y + ImGuiUtils.FixedSize(new Vector2(110)).Y));
+        ImGui.PushStyleColor(ImGuiCol.Button, RightHandActive ? ImGuiTheme.Button : ImGuiTheme.DarkButton);
+        if (ImGui.Button("R", ImGuiUtils.FixedSize(new Vector2(25, 35))))
+        {
+            RightHandActive = !RightHandActive;
+        }
+        ImGui.PopStyleColor();
+        ImGui.PopFont();
+    }
+
     private static void DrawSharedControls(bool showTopBar, bool playMode)
     {
         if (!showTopBar && !LockTopBar)
@@ -936,6 +983,11 @@ public class ScreenCanvas
             | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoAlpha);
 
         _rightHandColorPicker = ImGui.IsPopupOpen("Right Hand Colorpicker");
+
+        if (!playMode)
+        {
+            DrawHandToggleButtons();
+        }
 
         if (CoreSettings.SoundEngine == SoundEngine.SoundFonts)
         {
@@ -1035,9 +1087,11 @@ public class ScreenCanvas
         }
 
         // SUSTAIN PEDAL BUTTON
-        ImGui.SetCursorPos(new Vector2(ImGui.GetIO().DisplaySize.X - ImGuiUtils.FixedSize(new Vector2(75)).X, ImGui.GetWindowSize().Y - ImGuiUtils.FixedSize(new Vector2(60)).Y));
-        if (ImGui.ImageButton("SustainBtn", IOHandle.SustainPedalActive ? Drawings.SustainPedalOn : Drawings.SustainPedalOff,
-            new Vector2(50)))
+        // ImageButton padding according to https://github.com/ocornut/imgui/issues/6901#issuecomment-1749178625
+        var imagePadding = ImGui.GetStyle().FramePadding * 2.0f;
+        ImGui.SetCursorPos(ImGui.GetWindowSize() - ImGuiUtils.FixedSize(new Vector2(65) + imagePadding));
+        if (ImGui.ImageButton("SustainBtn", IOHandle.SustainPedalActive ? Drawings.SustainPedalOn : Drawings.SustainPedalOff, 
+                ImGuiUtils.FixedSize(new Vector2(50))))
         {
             IOHandle.OnEventReceived(null, new Melanchall.DryWetMidi.Multimedia.MidiEventReceivedEventArgs(
                 new ControlChangeEvent(ControlUtilities.AsSevenBitNumber(ControlName.DamperPedal),

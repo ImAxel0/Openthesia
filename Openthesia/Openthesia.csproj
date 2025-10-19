@@ -8,28 +8,12 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ApplicationIcon>logo.ico</ApplicationIcon>
     <Platforms>AnyCPU;x64</Platforms>
-    <Configurations>Debug;Release;SupporterDebug;SupporterRelease</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterDebug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterDebug|x64'">
-    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterRelease|AnyCPU'">
-    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SupporterRelease|x64'">
-    <DefineConstants>$(DefineConstants);SUPPORTER</DefineConstants>
-  </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
 
@@ -67,7 +51,7 @@
 
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.90.1.1" />
-    <PackageReference Include="Melanchall.DryWetMidi" Version="7.1.0" />
+    <PackageReference Include="Melanchall.DryWetMidi" Version="8.0.1" />
     <PackageReference Include="MeltySynth" Version="2.4.1" />
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

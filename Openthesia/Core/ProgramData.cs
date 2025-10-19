@@ -10,7 +10,7 @@ namespace Openthesia.Core;
 
 public static class ProgramData
 {
-    public const string ProgramVersion = "1.5.1";
+    public const string ProgramVersion = "1.5.2";
     public static IntPtr LogoImage;
     public static string SettingsPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia", "Settings.json");
     public static string HandsDataPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia\\HandsData");
@@ -21,6 +21,17 @@ public static class ProgramData
         Directory.CreateDirectory(HandsDataPath);
         LoadSettings();
         ImGuiTheme.PushTheme();
+
+        // Always create the SoundFonts directory if it doesn't exist (this is mainly for when building from source)
+        // In a built version it will need admin privileges to create the folder if installed in certain directories (e.g Program Files (x86))
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "SoundFonts"));
+        }
+        catch (Exception ex)
+        {
+            User32.MessageBox(IntPtr.Zero, $"Failed to create SoundFonts directory:\n{ex.Message}\n\nTry to run the program as administrator", "Error", User32.MB_FLAGS.MB_TOPMOST | User32.MB_FLAGS.MB_OK);
+        }
 
         if (CoreSettings.SoundEngine == Enums.SoundEngine.SoundFonts)
         {

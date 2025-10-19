@@ -3,6 +3,7 @@ using NAudio.Wave;
 using Openthesia.Core.Midi;
 using Openthesia.Enums;
 using Openthesia.Settings;
+using Vanara.PInvoke;
 
 namespace Openthesia.Core.SoundFonts;
 
@@ -76,7 +77,9 @@ public class SoundFontPlayer
 
     public static void Initialize()
     {
-        string defaultSoundFontPath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "SoundFonts\\SalamanderGrandPiano.sf2");
+        string basePath = Path.GetDirectoryName(Environment.ProcessPath);
+
+        string defaultSoundFontPath = Path.Combine(basePath, "SoundFonts\\SalamanderGrandPiano.sf2");
         if (File.Exists(defaultSoundFontPath))
         {
             // load default sound font
@@ -85,7 +88,7 @@ public class SoundFontPlayer
         else
         {
             // load first available if default is missing or nothing
-            var soundFonts = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "SoundFonts")).Where(f => Path.GetExtension(f) == ".sf2");
+            var soundFonts = Directory.GetFiles(Path.Combine(basePath, "SoundFonts")).Where(f => Path.GetExtension(f) == ".sf2");
             if (soundFonts.Any())
             {
                 if (File.Exists(soundFonts.ElementAt(0)))
