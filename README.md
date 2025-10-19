@@ -10,10 +10,6 @@
 
 ### :star2: If you really enjoy the app consider starring the repo :star2:
 
-<ins>As I don't have enough time to actively continue the development of the project, the **Supporter Edition** will be removed starting from the next release and all features will become available to all users. A special thank to those few who supported it.</ins>
-
----
-
 :orange_book: [Documentation](https://openthesia.pages.dev/documentation) :orange_book:
 
 ## What can it do :question:
@@ -53,6 +49,13 @@ If you're a Linux user and willing to experiment, you may still enjoy the full e
 ## Installation :arrow_down:
 
 Download the latest setup from the [releases](https://github.com/ImAxel0/Openthesia/releases) section and install the program.
+
+---
+
+## Building from Source :wrench:
+1. Install [NET6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) if not already installed
+2. Clone the repository and build the project with your favorite IDE or tool
+3. If using SoundFonts, run the program once to create the `SoundFonts` folder inside the program build directory then place your .sf2 files under it
 
 ---
 
