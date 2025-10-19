@@ -22,6 +22,17 @@ public static class ProgramData
         LoadSettings();
         ImGuiTheme.PushTheme();
 
+        // Always create the SoundFonts directory if it doesn't exist (this is mainly for when building from source)
+        // In a built version it will need admin privileges to create the folder if installed in certain directories (e.g Program Files (x86))
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "SoundFonts"));
+        }
+        catch (Exception ex)
+        {
+            User32.MessageBox(IntPtr.Zero, $"Failed to create SoundFonts directory:\n{ex.Message}\n\nTry to run the program as administrator", "Error", User32.MB_FLAGS.MB_TOPMOST | User32.MB_FLAGS.MB_OK);
+        }
+
         if (CoreSettings.SoundEngine == Enums.SoundEngine.SoundFonts)
         {
             SoundFontPlayer.Initialize();
