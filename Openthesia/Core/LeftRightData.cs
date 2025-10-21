@@ -8,7 +8,7 @@ public class LeftRightData
     public static List<bool> S_IsRightNote = new();
     
     [XmlIgnore]
-    public static Dictionary<string, int> S_NoteIndexMap = new();
+    public static Dictionary<string, List<int>> S_NoteIndexMap = new();
 
     [XmlArray("IsRightNote"), XmlArrayItem(typeof(bool))]
     public List<bool> IsRightNote = new();

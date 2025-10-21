@@ -112,16 +112,25 @@ public class ModeSelectionWindow : ImGuiWindow
             LeftRightData.S_IsRightNote.Add(true);
         }
         MidiEditing.ReadData();
-        
-        // Map the unique hash for each note to its index in the midi file for later reference during midi note playback
-        LeftRightData.S_NoteIndexMap = new Dictionary<string, int>();
+
+        // Map each note (possibly multiple at the same time/number) to its indices in the MIDI file
+        LeftRightData.S_NoteIndexMap = new Dictionary<string, List<int>>();
+
         foreach (var (note, i) in MidiFileData.Notes.Select((note, i) => (note, i)))
         {
-            // uniquely hash each note with a composite key of its number and absolute time
-            var hash = note.NoteNumber + note.Time.ToString();
-            LeftRightData.S_NoteIndexMap.Add(hash, i);
+            // Build a stable composite key
+            var key = $"{note.NoteNumber}_{note.Time}";
+
+            // Create or append to the list
+            if (!LeftRightData.S_NoteIndexMap.TryGetValue(key, out var indexList))
+            {
+                indexList = new List<int>();
+                LeftRightData.S_NoteIndexMap[key] = indexList;
+            }
+
+            indexList.Add(i);
         }
-        
+
         WindowsManager.SetWindow(Enums.Windows.MidiPlayback);
     }
 
