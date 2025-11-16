@@ -6,23 +6,22 @@ public static class NoteCallback
 {
     public static NotePlaybackData HandMutingNoteCallback(NotePlaybackData rawNoteData, long rawTime, long rawLength, TimeSpan playbackTime)
     {
-        // Use a composite key which is the unique combination of note number and time in the midi track
-        var key = rawNoteData.NoteNumber + rawTime.ToString();
-        
-        if (!LeftRightData.S_NoteIndexMap.ContainsKey(key))
+        // Rebuild the same composite key as before
+        var key = $"{rawNoteData.NoteNumber}_{rawTime}";
+
+        // If we have any matching notes, check them all
+        if (LeftRightData.S_NoteIndexMap.TryGetValue(key, out var indices))
         {
-            return rawNoteData; // Play the note
+            foreach (var index in indices)
+            {
+                // Mute if the corresponding hand is inactive
+                if (LeftRightData.S_IsRightNote[index] && !ScreenCanvasControls.RightHandActive ||
+                    !LeftRightData.S_IsRightNote[index] && !ScreenCanvasControls.LeftHandActive)
+                {
+                    return null!; // Mute the note
+                }
+            }
         }
-        
-        var index = LeftRightData.S_NoteIndexMap[key];
-        
-        // Check if the note should be muted because the corresponding hand is muted
-        if (LeftRightData.S_IsRightNote[index] && !ScreenCanvasControls.RightHandActive ||
-            !LeftRightData.S_IsRightNote[index] && !ScreenCanvasControls.LeftHandActive)
-        {
-            return null!; // Mute the note
-        }
-        
         return rawNoteData; // Play the note
     }
 

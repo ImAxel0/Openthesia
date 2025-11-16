@@ -10,7 +10,7 @@ namespace Openthesia.Core;
 
 public static class ProgramData
 {
-    public const string ProgramVersion = "1.5.2";
+    public const string ProgramVersion = "1.5.3";
     public static IntPtr LogoImage;
     public static string SettingsPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia", "Settings.json");
     public static string HandsDataPath = Path.Combine(KnownFolders.RoamingAppData.Path, "Openthesia\\HandsData");
